@@ -62,7 +62,7 @@ async function loadHealth() {
 async function loadStats() {
   const stats = await api('/api/stats');
   elements.videos.textContent = stats.videoCount;
-  elements.views.textContent = stats.totalViews;
+  elements.views.textContent = Number(stats.totalViews).toLocaleString('en-US');
   elements.size.textContent = formatBytes(stats.totalBytes);
 }
 
@@ -80,7 +80,7 @@ function renderVideos() {
     const player = document.createElement('video');
     player.controls = true;
     player.preload = 'metadata';
-    player.src = `/api/videos/${video.id}/stream`;
+    player.src = `/api/videos/${video.id}/stream#t=0.5`;
 
     const body = document.createElement('div');
     body.className = 'card-body';
@@ -93,7 +93,7 @@ function renderVideos() {
 
     const meta = document.createElement('div');
     meta.className = 'meta';
-    meta.innerHTML = `<span>${formatBytes(video.sizeBytes)}</span><span>${video.views} views</span><span>${formatDate(video.createdAt)}</span>`;
+    meta.innerHTML = `<span>${formatBytes(video.sizeBytes)}</span><span>${Number(video.views).toLocaleString('en-US')} views</span><span>${formatDate(video.createdAt)}</span>`;
 
     const actions = document.createElement('div');
     actions.className = 'card-actions';

@@ -7,13 +7,10 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="topbar">
+    <header class="masthead">
       <div class="brand">
-        <span class="brand-mark">SV</span>
-        <div>
-          <h1>StreamVault</h1>
-          <p>Video streaming platform on Kubernetes</p>
-        </div>
+        <h1>Stream<em>Vault</em></h1>
+        <p>Video streaming on Kubernetes</p>
       </div>
       <div class="cluster">
         <span class="dot" id="health-dot"></span>
@@ -23,12 +20,12 @@
 
     <main>
       <section class="hero">
-        <div>
-          <span class="eyebrow">Node.js / MongoDB / NGINX / Kubernetes</span>
-          <h2>Upload once. Stream from any replica.</h2>
+        <div class="hero-copy">
+          <span class="eyebrow">Node.js · MongoDB GridFS · NGINX · Kubernetes</span>
+          <h2>Upload once.<br /><em>Stream from any replica.</em></h2>
           <p>
-            Every request is served by a different pod behind the NGINX load balancer.
-            The deployment scales horizontally when CPU crosses 60 percent.
+            Each request lands on whichever pod NGINX picks. Video bytes live in GridFS, so every
+            replica can serve every video, and the deployment grows from 3 to 12 pods when CPU passes 60 percent.
           </p>
         </div>
         <dl class="stats">
@@ -38,8 +35,19 @@
         </dl>
       </section>
 
-      <section class="panel upload-panel">
-        <h2>Upload a video</h2>
+      <section class="library">
+        <div class="section-head">
+          <h2>Library</h2>
+          <input id="search" type="search" placeholder="Search titles" />
+        </div>
+        <div id="video-grid" class="grid"></div>
+        <p id="empty-state" class="empty" hidden>No videos yet. Upload one below.</p>
+      </section>
+
+      <section class="upload">
+        <div class="section-head">
+          <h2>Upload</h2>
+        </div>
         <form id="upload-form">
           <div class="field-row">
             <label>
@@ -59,20 +67,11 @@
           <p id="upload-status" class="status" role="status"></p>
         </form>
       </section>
-
-      <section class="library">
-        <div class="library-head">
-          <h2>Library</h2>
-          <input id="search" type="search" placeholder="Search titles" />
-        </div>
-        <div id="video-grid" class="grid"></div>
-        <p id="empty-state" class="empty" hidden>No videos yet. Upload one to get started.</p>
-      </section>
     </main>
 
     <footer>
       <span id="footer-instance">StreamVault</span>
-      <span>Range requests enabled · 206 Partial Content</span>
+      <span>Range requests · 206 Partial Content</span>
     </footer>
 
     <script src="/app.js" defer></script>
