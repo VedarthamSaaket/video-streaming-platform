@@ -40,16 +40,19 @@ make hpa
 ```
 
 The script starts a 120 connection autocannon run against the stream endpoint, prints the HPA every
-15 seconds and finishes with the final replica count. A normal result on the lab machine:
+15 seconds and finishes with the final replica count. Results from this build:
 
-| Phase | Replicas | CPU per pod |
-|---|---|---|
-| Idle | 3 | 1 to 3 percent |
-| 30 seconds into load | 5 to 7 | 55 to 70 percent |
-| 90 seconds into load | 10 to 12 | 50 to 65 percent |
-| 3 minutes after load | 3 | under 5 percent |
+| Phase | API replicas | NGINX replicas | Notes |
+|---|---|---|---|
+| Idle | 3 | 2 | 7% CPU per API pod |
+| 30 seconds into load | 6 | 4 | CPU crossed 169% of target |
+| 60 seconds into load | 12 | 6 | HPA hit both limits |
+| 90 seconds into load | 12 | 6 | 68,861 requests, 17.9 GB, 0 errors |
+| 3 minutes after load | 3 | 2 | scale-down completed |
 
-Actual numbers from this build are captured in `docs/screenshots/`.
+The load run sustained 421.5 requests per second with a p99 of 696 ms and no errors or timeouts.
+Screenshots of the HPA walk, the peak pod list and the autocannon output are in
+`docs/screenshots/`.
 
 ## Tuning notes
 

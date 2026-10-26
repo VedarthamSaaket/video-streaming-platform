@@ -38,6 +38,35 @@ kubectl -n streamvault scale deploy/streamvault-app --replicas=6
 The HPA owns the replica count, so manual changes are reverted on the next metrics sync. To pin a
 count, delete the HPA first.
 
+## Monitoring
+
+```bash
+docker compose -f observability/docker-compose.yml up -d
+```
+
+Prometheus scrapes the kind NodePort from inside the kind Docker network. Grafana runs at
+<http://localhost:3001> with anonymous admin access and two provisioned dashboards:
+`streamvault-overview` and `streamvault-runtime`. To tear the stack down:
+
+```bash
+docker compose -f observability/docker-compose.yml down
+```
+
+## Cloud provisioning
+
+The AWS stack lives in `terraform/`:
+
+```bash
+cd terraform
+terraform init
+terraform validate
+terraform plan -out streamvault.tfplan
+terraform apply streamvault.tfplan
+```
+
+Then use `$(terraform output -raw configure_kubectl)` and push the image to the ECR repository. See
+`terraform/README.md` for the complete sequence and the cost warning.
+
 ## Common failures
 
 ### App pods are Running but not Ready

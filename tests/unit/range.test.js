@@ -42,7 +42,12 @@ describe('parseRange', () => {
     expect(() => parseRange('bytes=-0', 1000)).toThrow(/not satisfiable/);
   });
 
-  test('rejects an empty object', () => {
-    expect(() => parseRange(undefined, 0)).toThrow(/not satisfiable/);
+  test('returns null for an empty object without a range header', () => {
+    expect(parseRange(undefined, 0)).toBeNull();
+    expect(parseRange('', 0)).toBeNull();
+  });
+
+  test('rejects a range request on an empty object', () => {
+    expect(() => parseRange('bytes=0-0', 0)).toThrow(/not satisfiable/);
   });
 });

@@ -14,11 +14,11 @@ function parseRange(header, size) {
   if (!Number.isInteger(size) || size < 0) {
     throw new TypeError('size must be a non-negative integer');
   }
-  if (size === 0) {
-    throw unsatisfiable(0);
-  }
   if (header === undefined || header === null || header === '') {
     return null;
+  }
+  if (size === 0) {
+    throw unsatisfiable(0);
   }
   if (typeof header !== 'string') {
     throw new HttpError(400, 'Range header must be a string');

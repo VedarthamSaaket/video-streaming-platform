@@ -1,0 +1,159 @@
+
+> streamvault@1.0.0 test:coverage
+> jest --coverage --runInBand
+
+PASS tests/integration/videos.test.js
+  health endpoints
+    ✓ GET /healthz reports the instance (14 ms)
+    ✓ GET /readyz reports mongo and storage as up (4 ms)
+    ✓ GET /metrics exposes Prometheus metrics (4 ms)
+  video API
+    ✓ uploads a video and hides the storage key (47 ms)
+    ✓ rejects an upload without a file (3 ms)
+    ✓ rejects a non-video file (3 ms)
+    ✓ rejects a missing title (2 ms)
+    ✓ lists uploaded videos newest first (43 ms)
+    ✓ paginates the list (42 ms)
+    ✓ searches by text (40 ms)
+    ✓ gets one video by id (38 ms)
+    ✓ returns 404 for an unknown video (2 ms)
+    ✓ returns 400 for a malformed id (1 ms)
+    ✓ streams the whole file with 200 (40 ms)
+    ✓ serves a byte range with 206 and Content-Range (39 ms)
+    ✓ serves a suffix range (41 ms)
+    ✓ returns 416 for an unsatisfiable range (46 ms)
+    ✓ increments the view counter when streamed (38 ms)
+    ✓ downloads as an attachment (38 ms)
+    ✓ updates metadata (50 ms)
+    ✓ rejects an empty update (38 ms)
+    ✓ deletes a video and its GridFS file (40 ms)
+  stats and fallbacks
+    ✓ GET /api/stats summarises the library (41 ms)
+    ✓ unknown routes return a JSON 404 (3 ms)
+    ✓ malformed JSON returns 400 (2 ms)
+
+PASS tests/integration/edge-cases.test.js
+  upload edge cases
+    ✓ accepts an empty file and streams it back empty (28 ms)
+    ✓ rejects a range on an empty file (14 ms)
+    ✓ rejects a file larger than the configured limit (4 ms)
+    ✓ cleans up the GridFS file when validation fails (2 ms)
+    ✓ supports a one byte range (23 ms)
+    ✓ supports a one byte suffix range (14 ms)
+    ✓ rejects multiple ranges (4 ms)
+    ✓ answers HEAD requests with headers and no body (5 ms)
+    ✓ encodes unicode filenames in Content-Disposition (5 ms)
+  metadata edge cases
+    ✓ rejects a too long title on update (5 ms)
+    ✓ updates the uploader (4 ms)
+    ✓ deleting twice returns 404 (6 ms)
+    ✓ returns an empty search result (4 ms)
+    ✓ rejects a zero limit (1 ms)
+    ✓ returns instance and request id on a 404 route (2 ms)
+  metrics edge cases
+    ✓ counts successful uploads and stream requests (6 ms)
+
+PASS tests/integration/storage.test.js
+  GridFS storage driver
+    ✓ stores a file and reports its size and content type (55 ms)
+    ✓ reads the whole object (2 ms)
+    ✓ reads an inclusive byte range
+    ✓ reads the last byte of an object (1 ms)
+    ✓ deletes the object (2 ms)
+    ✓ health check succeeds against the database
+
+PASS tests/integration/health-failure.test.js
+  health endpoints without MongoDB
+    ✓ liveness still succeeds (1 ms)
+    ✓ readiness fails with a 503
+    ✓ detailed health reports degraded (1 ms)
+    ✓ metrics remain available (1 ms)
+
+PASS tests/unit/videoModel.test.js
+  Video model
+    ✓ applies defaults (1 ms)
+    ✓ requires a title (1 ms)
+    ✓ requires a storage key
+    ✓ serialises id and hides the storage key
+    ✓ exposes a findRecent helper
+
+PASS tests/unit/errorHandler.test.js
+  errorHandler
+    ✓ renders an HttpError with its headers (1 ms)
+    ✓ hides the message of an unexpected error
+    ✓ renders a ZodError as a 400
+    ✓ renders a mongoose CastError as a 400
+    ✓ renders a mongoose ValidationError as a 400 with details (1 ms)
+    ✓ renders a JSON parse error as a 400
+    ✓ destroys the response when headers were already sent
+
+PASS tests/unit/range.test.js
+  parseRange
+    ✓ returns null when no range header is sent
+    ✓ parses a closed byte range (1 ms)
+    ✓ clamps the end of the range to the object size
+    ✓ parses an open ended range
+    ✓ parses a suffix range
+    ✓ clamps a suffix range larger than the object
+    ✓ rejects a start beyond the object (2 ms)
+    ✓ rejects a reversed range
+    ✓ rejects multiple ranges
+    ✓ rejects a zero length suffix
+    ✓ returns null for an empty object without a range header
+    ✓ rejects a range request on an empty object (1 ms)
+
+PASS tests/unit/validation.test.js
+  request validation
+    ✓ accepts a minimal create payload and applies defaults
+    ✓ rejects a create payload without a title
+    ✓ rejects a title longer than 200 characters
+    ✓ rejects an empty update payload (1 ms)
+    ✓ accepts a partial update
+    ✓ coerces pagination query parameters
+    ✓ rejects a limit above 100
+
+PASS tests/unit/requestContext.test.js
+  requestContext
+    ✓ reuses an incoming request id
+    ✓ generates a UUID when the header is missing
+
+---------------------|---------|----------|---------|---------|---------------------------------------------
+File                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                           
+---------------------|---------|----------|---------|---------|---------------------------------------------
+All files            |   89.18 |    77.04 |   81.69 |   90.45 |                                             
+ src                 |   96.66 |       70 |   85.71 |   98.27 |                                             
+  app.js             |   95.45 |     62.5 |      75 |   97.61 | 39                                          
+  metrics.js         |     100 |      100 |     100 |     100 |                                             
+ src/config          |     100 |    84.21 |     100 |     100 |                                             
+  index.js           |     100 |    84.21 |     100 |     100 | 12,15,23                                    
+ src/controllers     |   81.25 |       66 |   73.68 |   82.64 |                                             
+  statsController.js |     100 |       50 |     100 |     100 | 19                                          
+  videoController.js |      80 |    66.66 |   72.22 |   81.41 | 15-22,87-90,114-115,149-153,182-187,191-195 
+ src/db              |   34.78 |    14.28 |      40 |   38.09 |                                             
+  mongo.js           |   34.78 |    14.28 |      40 |   38.09 | 8-32                                        
+ src/middleware      |   98.71 |    91.17 |     100 |     100 |                                             
+  errorHandler.js    |     100 |      100 |     100 |     100 |                                             
+  notFound.js        |     100 |      100 |     100 |     100 |                                             
+  requestContext.js  |     100 |      100 |     100 |     100 |                                             
+  upload.js          |   96.87 |    78.57 |     100 |     100 | 36-38,45                                    
+ src/models          |    90.9 |        0 |      50 |    90.9 |                                             
+  Video.js           |    90.9 |        0 |      50 |    90.9 | 67                                          
+ src/routes          |   97.82 |     87.5 |     100 |   97.82 |                                             
+  health.js          |   96.15 |     87.5 |     100 |   96.15 | 44                                          
+  stats.js           |     100 |      100 |     100 |     100 |                                             
+  videos.js          |     100 |      100 |     100 |     100 |                                             
+ src/storage         |   95.65 |       80 |      80 |   95.65 |                                             
+  gridfsStorage.js   |   94.87 |       75 |   76.92 |   94.87 | 30,79                                       
+  index.js           |     100 |      100 |     100 |     100 |                                             
+ src/utils           |   94.44 |    87.17 |     100 |   94.44 |                                             
+  HttpError.js       |     100 |      100 |     100 |     100 |                                             
+  asyncHandler.js    |     100 |      100 |     100 |     100 |                                             
+  logger.js          |     100 |    33.33 |     100 |     100 | 4-6                                         
+  range.js           |   89.65 |     90.9 |     100 |   89.65 | 15,24,50                                    
+  validation.js      |     100 |      100 |     100 |     100 |                                             
+---------------------|---------|----------|---------|---------|---------------------------------------------
+Test Suites: 9 passed, 9 total
+Tests:       84 passed, 84 total
+Snapshots:   0 total
+Time:        3.562 s, estimated 4 s
+Ran all test suites.

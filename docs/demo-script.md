@@ -92,9 +92,17 @@ joins without touching the proxy configuration.
 npm test
 ```
 
-43 tests across range parsing, validation and the real HTTP surface. The integration suite uploads a
-Buffer, reads it back with Range headers, checks the exact bytes, verifies 206 and 416 responses, and
-confirms deletion removes the GridFS file.
+84 tests across nine suites: 90.45% line coverage, plus unit tests for range parsing, validation,
+error rendering, request context, the Mongoose model and the GridFS driver. The integration suite
+uploads a Buffer, reads it back with Range headers, checks the exact bytes, verifies 206 and 416
+responses, tests unicode filenames, zero byte files and confirms deletion removes the GridFS file.
+
+```bash
+npm run test:api
+```
+
+The Postman collection runs 20 requests and 49 assertions through Newman: health, upload validation,
+CRUD, search, full and partial streaming, invalid ranges, downloads and cleanup.
 
 ## 6. Autoscaling (3 minutes)
 
@@ -134,14 +142,38 @@ pods. Mention:
 
 ## 8. CI/CD (1 minute)
 
-Open the GitHub Actions run. Four jobs:
+Open the GitHub Actions run. Five jobs:
 
-1. Lint and 43 tests.
-2. Kustomize render plus kubeconform validation.
-3. Image build, Trivy scan and GHCR push.
-4. kind cluster, real deployment, upload, range check and load balancing check.
+1. ESLint and 84 Jest tests with coverage.
+2. Kustomize render plus kubeconform validation for both overlays and the observability stack.
+3. Terraform format, init and validate.
+4. Image build, Trivy scan and GHCR push.
+5. kind cluster, real deployment, upload, range check, load balancing check and the Postman collection.
 
-## 9. Close
+## 9. Monitoring (1 minute)
+
+```bash
+docker compose -f observability/docker-compose.yml up -d
+```
+
+Open <http://localhost:3001>. Two dashboards are provisioned automatically: application traffic and
+Node runtime. Show the request rate, p99 latency, error ratio, active streams, throughput, uploads,
+heap, event loop lag and GC pause.
+
+## 10. Cloud infrastructure (1 minute)
+
+```bash
+cd terraform
+terraform fmt -check -recursive
+terraform validate
+terraform providers
+```
+
+The stack provisions a three AZ VPC, EKS 1.31, a managed node group, ECR, IRSA roles for the AWS
+Load Balancer Controller and cluster autoscaler, and the Helm releases for both controllers and
+metrics-server. `terraform plan` and `apply` need AWS credentials; CI validates without them.
+
+## 11. Close
 
 The same manifests run on a cloud overlay with a LoadBalancer, an Ingress, gp3 storage and a higher
 HPA ceiling. The lab proves the orchestration and autoscaling behaviour without cloud spend.

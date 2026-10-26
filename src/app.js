@@ -21,7 +21,9 @@ function createApp({ logger = createLogger() } = {}) {
 
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', true);
+  // NGINX is exactly one hop in front of the API. Trusting every proxy would
+  // let a client spoof X-Forwarded-For and bypass the upload rate limiter.
+  app.set('trust proxy', 1);
 
   app.use(
     helmet({

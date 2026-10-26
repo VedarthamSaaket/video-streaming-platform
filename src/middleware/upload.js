@@ -30,18 +30,29 @@ const upload = multer({
 
 const uploadSingleVideo = upload.single('file');
 
+// Busboy decodes multipart filenames as latin1. Recover UTF-8 names while
+// leaving plain ASCII and genuine latin1 names untouched.
+function normalizeFilename(name) {
+  if (!name) return name;
+  const decoded = Buffer.from(name, 'latin1').toString('utf8');
+  return decoded.includes('\uFFFD') ? name : decoded;
+}
+
 function uploadMiddleware(req, res, next) {
   uploadSingleVideo(req, res, (error) => {
-    if (!error) {
-      next();
+    if (error) {
+      if (error instanceof multer.MulterError) {
+        const status = error.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+        next(new HttpError(status, error.message));
+        return;
+      }
+      next(error);
       return;
     }
-    if (error instanceof multer.MulterError) {
-      const status = error.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
-      next(new HttpError(status, error.message));
-      return;
+    if (req.file) {
+      req.file.originalname = normalizeFilename(req.file.originalname);
     }
-    next(error);
+    next();
   });
 }
 

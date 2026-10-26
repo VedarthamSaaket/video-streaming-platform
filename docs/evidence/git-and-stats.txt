@@ -1,0 +1,13 @@
+$ git log --oneline --reverse
+4af84cf feat: build stateless video streaming API
+9168cb0 feat: containerise the stack with docker and nginx
+e1e1c30 feat: deploy to kubernetes with horizontal autoscaling
+44ce08b docs: add evidence, runbooks and ci pipeline
+
+$ find src public tests -name "*.js" | xargs wc -l | tail -1
+    1610 total
+
+Kind cluster: 1 control plane + 2 workers
+streamvault-control-plane Ready
+streamvault-worker Ready
+streamvault-worker2 Ready

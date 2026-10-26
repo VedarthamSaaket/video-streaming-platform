@@ -1,0 +1,47 @@
+$ npm run test:api
+
+
+> streamvault@1.0.0 test:api
+> newman run postman/StreamVault.postman_collection.json -e postman/local.postman_environment.json --working-dir . --reporters cli
+
+(node:18870) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+StreamVault API
+
+❏ 01 Health
+↳ Liveness
+  GET http://localhost:30080/healthz [200 OK, 994B, 11ms]
+  ✓  200 OK
+  ✓  status is ok
+  ✓  reports the serving instance
+
+↳ Readiness
+   ...
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [404 Not Found, 1.06kB, 2ms]
+  ✓  404 Not Found
+
+↳ Delete is idempotent enough
+  DELETE http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [404 Not Found, 1.06kB, 3ms]
+  ✓  404 on second delete
+
+┌─────────────────────────┬──────────────────┬─────────────────┐
+│                         │         executed │          failed │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│              iterations │                1 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│                requests │               20 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│            test-scripts │               20 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│      prerequest-scripts │                0 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│              assertions │               49 │               0 │
+├─────────────────────────┴──────────────────┴─────────────────┤
+│ total run duration: 488ms                                    │
+├──────────────────────────────────────────────────────────────┤
+│ total data received: 6.63MB (approx)                         │
+├──────────────────────────────────────────────────────────────┤
+│ average response time: 8ms [min: 2ms, max: 64ms, s.d.: 14ms] │
+└──────────────────────────────────────────────────────────────┘

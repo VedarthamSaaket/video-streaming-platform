@@ -1,0 +1,38 @@
+$ npm run test:coverage
+
+File                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                           
+---------------------|---------|----------|---------|---------|---------------------------------------------
+All files            |   89.18 |    77.04 |   81.69 |   90.45 |                                             
+ src                 |   96.66 |       70 |   85.71 |   98.27 |                                             
+  app.js             |   95.45 |     62.5 |      75 |   97.61 | 39                                          
+  metrics.js         |     100 |      100 |     100 |     100 |                                             
+ src/config          |     100 |    84.21 |     100 |     100 |                                             
+  index.js           |     100 |    84.21 |     100 |     100 | 12,15,23                                    
+ src/controllers     |   81.25 |       66 |   73.68 |   82.64 |                                             
+  statsController.js |     100 |       50 |     100 |     100 | 19                                          
+  videoController.js |      80 |    66.66 |   72.22 |   81.41 | 15-22,87-90,114-115,149-153,182-187,191-195 
+ src/db              |   34.78 |    14.28 |      40 |   38.09 |                                             
+  mongo.js           |   34.78 |    14.28 |      40 |   38.09 | 8-32                                        
+ src/middleware      |   98.71 |    91.17 |     100 |     100 |                                             
+  errorHandler.js    |     100 |      100 |     100 |     100 |                                             
+  notFound.js        |     100 |      100 |     100 |     100 |                                             
+  requestContext.js  |     100 |      100 |     100 |     100 |                                             
+  upload.js          |   96.87 |    78.57 |     100 |     100 | 36-38,45                                    
+ src/models          |    90.9 |        0 |      50 |    90.9 |                                             
+  Video.js           |    90.9 |        0 |      50 |    90.9 | 67                                          
+ src/routes          |   97.82 |     87.5 |     100 |   97.82 |                                             
+  health.js          |   96.15 |     87.5 |     100 |   96.15 | 44                                          
+  stats.js           |     100 |      100 |     100 |     100 |                                             
+  videos.js          |     100 |      100 |     100 |     100 |                                             
+ src/storage         |   95.65 |       80 |      80 |   95.65 |                                             
+  gridfsStorage.js   |   94.87 |       75 |   76.92 |   94.87 | 30,79                                       
+  index.js           |     100 |      100 |     100 |     100 |                                             
+ src/utils           |   94.44 |    87.17 |     100 |   94.44 |                                             
+  HttpError.js       |     100 |      100 |     100 |     100 |                                             
+  asyncHandler.js    |     100 |      100 |     100 |     100 |                                             
+  logger.js          |     100 |    33.33 |     100 |     100 | 4-6                                         
+  range.js           |   89.65 |     90.9 |     100 |   89.65 | 15,24,50                                    
+  validation.js      |     100 |      100 |     100 |     100 |                                             
+
+Test Suites: 9 passed, 9 total
+Tests:       84 passed, 84 total

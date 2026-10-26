@@ -1,0 +1,20 @@
+$ terraform fmt -check -recursive
+(no output means every file is formatted)
+
+$ terraform validate
+Success! The configuration is valid.
+
+
+$ terraform providers
+
+Providers required by configuration:
+.
+├── provider[registry.terraform.io/hashicorp/helm] ~> 2.13
+├── provider[registry.terraform.io/hashicorp/kubernetes] ~> 2.31
+├── provider[registry.terraform.io/hashicorp/aws] ~> 5.60
+├── module.cluster_autoscaler_irsa
+│   └── provider[registry.terraform.io/hashicorp/aws] >= 4.0.0
+├── module.vpc
+│   └── provider[registry.terraform.io/hashicorp/aws] >= 5.30.0
+├── module.eks
+│   ├── provider[registry.terraform.io/hashicorp/time] >= 0.9.0

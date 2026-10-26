@@ -52,6 +52,7 @@ jobs:
           cp k8s/base/secrets.env.example k8s/base/secrets.env
           kubectl kustomize k8s/overlays/local > /tmp/local.yaml
           kubectl kustomize k8s/overlays/cloud > /tmp/cloud.yaml
+          kubectl kustomize k8s/observability > /tmp/observability.yaml
       - name: Install kubeconform
         run: |
           curl -sSLo kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
@@ -59,7 +60,23 @@ jobs:
           sudo mv kubeconform /usr/local/bin/kubeconform
       - name: Validate manifests
         run: |
-          kubeconform -strict -summary -ignore-missing-schemas /tmp/local.yaml /tmp/cloud.yaml
+          kubeconform -strict -summary -ignore-missing-schemas /tmp/local.yaml /tmp/cloud.yaml /tmp/observability.yaml
+
+  terraform:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate -no-color
+
 
   image:
     name: Build and scan image
@@ -121,6 +138,20 @@ jobs:
         run: bash scripts/generate-sample.sh
       - name: Run smoke test
         run: bash scripts/smoke-test.sh http://localhost:30080
+      - name: API contract tests with Newman
+        run: |
+          npx newman run postman/StreamVault.postman_collection.json \
+            -e postman/local.postman_environment.json \
+            --working-dir . \
+            --reporters cli,junit \
+            --reporter-junit-export newman-report.xml
+      - name: Upload Newman report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman-report.xml
+          if-no-files-found: ignore
       - name: Show cluster state
         if: always()
         run: |

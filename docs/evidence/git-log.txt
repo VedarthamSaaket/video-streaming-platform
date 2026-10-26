@@ -1,0 +1,45 @@
+$ git log --oneline --graph --decorate
+* 44ce08b (HEAD -> main, origin/main) docs: add evidence, runbooks and ci pipeline
+* e1e1c30 feat: deploy to kubernetes with horizontal autoscaling
+* 9168cb0 feat: containerise the stack with docker and nginx
+* 4af84cf feat: build stateless video streaming API
+
+$ git status --short
+ M .github/workflows/ci.yml
+ M README.md
+ M docs/architecture.md
+ M docs/autoscaling.md
+ M docs/observability.md
+ D k8s/observability/grafana-dashboard.json
+ M package-lock.json
+ M package.json
+ M src/app.js
+ M src/middleware/upload.js
+ M src/utils/range.js
+ M tests/unit/range.test.js
+?? docs/evidence/coverage.txt
+?? docs/evidence/git-and-stats.txt
+?? docs/evidence/git-log.txt
+?? docs/evidence/grafana-load.txt
+?? docs/evidence/newman-raw.txt
+?? docs/evidence/newman.txt
+?? docs/evidence/terraform-validate.txt
+?? docs/evidence/terraform.txt
+?? docs/screenshots/11-grafana-app.png
+?? docs/screenshots/12-grafana-runtime.png
+?? k8s/observability/kustomization.yaml
+?? k8s/observability/streamvault-app.json
+?? k8s/observability/streamvault-runtime.json
+?? observability/
+?? postman/
+?? terraform/
+?? tests/integration/edge-cases.test.js
+?? tests/integration/health-failure.test.js
+?? tests/integration/storage.test.js
+?? tests/unit/errorHandler.test.js
+?? tests/unit/requestContext.test.js
+?? tests/unit/videoModel.test.js
+
+$ git remote -v
+origin	https://github.com/VedarthamSaaket/video-streaming-platform.git (fetch)
+origin	https://github.com/VedarthamSaaket/video-streaming-platform.git (push)

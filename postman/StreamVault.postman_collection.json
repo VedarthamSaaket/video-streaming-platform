@@ -1,0 +1,523 @@
+{
+  "info": {
+    "_postman_id": "9e6a2f1c-3b7e-4c8a-9f1d-2a6b5c4d8e10",
+    "name": "StreamVault API",
+    "description": "End-to-end API contract tests for StreamVault.\n\nRun from the repository root so the upload request can resolve docs/sample/sample.mp4:\n\nnpx newman run postman/StreamVault.postman_collection.json -e postman/local.postman_environment.json --working-dir .\n\nThe collection creates a video, exercises metadata, full and partial streaming, downloads it, then deletes it and verifies the 404.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Health",
+      "item": [
+        {
+          "name": "Liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/healthz", "host": ["{{baseUrl}}"], "path": ["healthz"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('status is ok', () => pm.expect(body.status).to.eql('ok'));",
+                  "pm.test('reports the serving instance', () => pm.expect(body.instance).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Readiness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/readyz", "host": ["{{baseUrl}}"], "path": ["readyz"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('MongoDB is up', () => pm.expect(body.checks.mongodb).to.eql('up'));",
+                  "pm.test('GridFS is up', () => pm.expect(body.checks.storage).to.eql('up'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detailed health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has memory details', () => pm.expect(body.memory).to.have.property('rss'));",
+                  "pm.test('has uptime', () => pm.expect(body.uptimeSeconds).to.be.a('number'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prometheus metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/metrics", "host": ["{{baseUrl}}"], "path": ["metrics"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('exposes active stream gauge', () => pm.expect(pm.response.text()).to.include('streamvault_active_streams'));",
+                  "pm.test('exposes request histogram', () => pm.expect(pm.response.text()).to.include('streamvault_http_request_duration_seconds'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Upload",
+      "item": [
+        {
+          "name": "Upload video",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Postman contract clip", "type": "text" },
+                { "key": "description", "value": "Uploaded by the Postman collection", "type": "text" },
+                { "key": "uploadedBy", "value": "postman", "type": "text" },
+                { "key": "file", "type": "file", "src": "docs/sample/sample.mp4" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/videos", "host": ["{{baseUrl}}"], "path": ["api", "videos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('returns an id', () => pm.expect(body.id).to.be.a('string').and.not.empty);",
+                  "pm.test('stores a positive size', () => pm.expect(body.sizeBytes).to.be.above(0));",
+                  "pm.test('starts at zero views', () => pm.expect(body.views).to.eql(0));",
+                  "pm.test('never exposes the storage key', () => pm.expect(body.storageKey).to.be.undefined);",
+                  "pm.collectionVariables.set('videoId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload without a file",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "title", "value": "No file", "type": "text" }]
+            },
+            "url": { "raw": "{{baseUrl}}/api/videos", "host": ["{{baseUrl}}"], "path": ["api", "videos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('explains the missing file', () => pm.expect(pm.response.json().error).to.include('file is required'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload with an invalid title",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "", "type": "text" },
+                { "key": "file", "type": "file", "src": "docs/sample/sample.mp4" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/videos", "host": ["{{baseUrl}}"], "path": ["api", "videos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('returns field errors', () => pm.expect(pm.response.json().details.fieldErrors.title).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Metadata",
+      "item": [
+        {
+          "name": "List videos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos"],
+              "query": [{ "key": "limit", "value": "10" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('returns an items array', () => pm.expect(body.items).to.be.an('array'));",
+                  "pm.test('contains the uploaded video', () => pm.expect(body.items.some(v => v.id === pm.collectionVariables.get('videoId'))).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search videos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos?search=Postman",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos"],
+              "query": [{ "key": "search", "value": "Postman" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('finds the video by text', () => pm.expect(pm.response.json().total).to.be.at.least(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get video",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('returns the right id', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('videoId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update metadata",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Postman contract clip (updated)\",\"description\":\"Updated by Newman\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('title changed', () => pm.expect(pm.response.json().title).to.include('updated'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Library stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/stats", "host": ["{{baseUrl}}"], "path": ["api", "stats"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('counts at least one video', () => pm.expect(body.videoCount).to.be.at.least(1));",
+                  "pm.test('reports total bytes', () => pm.expect(body.totalBytes).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Streaming",
+      "item": [
+        {
+          "name": "Full stream",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}/stream",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}", "stream"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('is a video', () => pm.expect(pm.response.headers.get('Content-Type')).to.eql('video/mp4'));",
+                  "pm.test('advertises range support', () => pm.expect(pm.response.headers.get('Accept-Ranges')).to.eql('bytes'));",
+                  "pm.test('returns bytes', () => pm.expect(pm.response.responseSize).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Byte range",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Range", "value": "bytes=0-1023" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}/stream",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}", "stream"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('206 Partial Content', () => pm.response.to.have.status(206));",
+                  "pm.test('has a Content-Range', () => pm.expect(pm.response.headers.get('Content-Range')).to.match(/^bytes 0-1023\\/\\d+$/));",
+                  "pm.test('returns exactly 1024 bytes', () => pm.expect(pm.response.responseSize).to.eql(1024));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Suffix range",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Range", "value": "bytes=-1024" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}/stream",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}", "stream"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('206 Partial Content', () => pm.response.to.have.status(206));",
+                  "pm.test('returns the last 1024 bytes', () => pm.expect(pm.response.responseSize).to.eql(1024));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid range",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Range", "value": "bytes=999999999-" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}/stream",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}", "stream"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('416 Range Not Satisfiable', () => pm.response.to.have.status(416));",
+                  "pm.test('reports the object size', () => pm.expect(pm.response.headers.get('Content-Range')).to.match(/^bytes \\*\\/\\d+$/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download as attachment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}", "download"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('is an attachment', () => pm.expect(pm.response.headers.get('Content-Disposition')).to.match(/^attachment/));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Cleanup",
+      "item": [
+        {
+          "name": "Delete video",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted video is gone",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('404 Not Found', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete is idempotent enough",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/{{videoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "{{videoId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('404 on second delete', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "videoId", "value": "" },
+    { "key": "sampleFile", "value": "docs/sample/sample.mp4" }
+  ]
+}

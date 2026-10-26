@@ -65,12 +65,15 @@ Important proxy settings:
 
 ### CI/CD
 
-The GitHub Actions pipeline has four jobs:
+The GitHub Actions pipeline has five jobs:
 
-1. `test`: ESLint plus 43 Jest tests.
-2. `manifests`: `kubectl kustomize` for both overlays and `kubeconform -strict`.
-3. `image`: multi-stage Docker build, Trivy scan, GHCR push on `main`.
-4. `e2e`: kind cluster, image load, full deployment, sample upload, range request, load balancing check.
+1. `test`: ESLint plus 84 Jest tests with 90.45% line coverage.
+2. `manifests`: `kubectl kustomize` for both overlays and the observability stack, then
+   `kubeconform -strict`.
+3. `terraform`: `terraform fmt -check`, `init -backend=false` and `validate`.
+4. `image`: multi-stage Docker build, Trivy scan, GHCR push on `main`.
+5. `e2e`: kind cluster, image load, full deployment, sample upload, range request, load balancing check
+   and the Postman collection through Newman.
 
 ## Failure behaviour
 

@@ -1,0 +1,144 @@
+
+> streamvault@1.0.0 test:api
+> newman run postman/StreamVault.postman_collection.json -e postman/local.postman_environment.json --working-dir . --reporters cli
+
+(node:18870) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+StreamVault API
+
+❏ 01 Health
+↳ Liveness
+  GET http://localhost:30080/healthz [200 OK, 994B, 11ms]
+  ✓  200 OK
+  ✓  status is ok
+  ✓  reports the serving instance
+
+↳ Readiness
+  GET http://localhost:30080/readyz [200 OK, 1.02kB, 3ms]
+  ✓  200 OK
+  ✓  MongoDB is up
+  ✓  GridFS is up
+
+↳ Detailed health
+  GET http://localhost:30080/health [200 OK, 1.17kB, 3ms]
+  ✓  200 OK
+  ✓  has memory details
+  ✓  has uptime
+
+↳ Prometheus metrics
+  GET http://localhost:30080/metrics [200 OK, 30.45kB, 3ms]
+  ✓  200 OK
+  ✓  exposes active stream gauge
+  ✓  exposes request histogram
+
+❏ 02 Upload
+↳ Upload video
+  POST http://localhost:30080/api/videos (node:18870) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+[201 Created, 1.3kB, 29ms]
+  ✓  201 Created
+  ✓  returns an id
+  ✓  stores a positive size
+  ✓  starts at zero views
+  ✓  never exposes the storage key
+
+↳ Upload without a file
+  POST http://localhost:30080/api/videos [400 Bad Request, 1.17kB, 4ms]
+  ✓  400 Bad Request
+  ✓  explains the missing file
+
+↳ Upload with an invalid title
+  POST http://localhost:30080/api/videos [400 Bad Request, 1.22kB, 64ms]
+  ✓  400 Bad Request
+  ✓  returns field errors
+
+❏ 03 Metadata
+↳ List videos
+  GET http://localhost:30080/api/videos?limit=10 [200 OK, 1.59kB, 5ms]
+  ✓  200 OK
+  ✓  returns an items array
+  ✓  contains the uploaded video
+
+↳ Search videos
+  GET http://localhost:30080/api/videos?search=Postman [200 OK, 1.26kB, 3ms]
+  ✓  200 OK
+  ✓  finds the video by text
+
+↳ Get video
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [200 OK, 1.21kB, 2ms]
+  ✓  200 OK
+  ✓  returns the right id
+
+↳ Update metadata
+  PATCH http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [200 OK, 1.21kB, 4ms]
+  ✓  200 OK
+  ✓  title changed
+
+↳ Library stats
+  GET http://localhost:30080/api/stats [200 OK, 1.04kB, 4ms]
+  ✓  200 OK
+  ✓  counts at least one video
+  ✓  reports total bytes
+
+❏ 04 Streaming
+↳ Full stream
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726/stream [200 OK, 3.3MB, 12ms]
+  ✓  200 OK
+  ✓  is a video
+  ✓  advertises range support
+  ✓  returns bytes
+
+↳ Byte range
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726/stream [206 Partial Content, 2.06kB, 4ms]
+  ✓  206 Partial Content
+  ✓  has a Content-Range
+  ✓  returns exactly 1024 bytes
+
+↳ Suffix range
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726/stream [206 Partial Content, 2.07kB, 3ms]
+  ✓  206 Partial Content
+  ✓  returns the last 1024 bytes
+
+↳ Invalid range
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726/stream [416 Range Not Satisfiable, 1.12kB, 3ms]
+  ✓  416 Range Not Satisfiable
+  ✓  reports the object size
+
+↳ Download as attachment
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726/download [200 OK, 3.3MB, 11ms]
+  ✓  200 OK
+  ✓  is an attachment
+
+❏ 05 Cleanup
+↳ Delete video
+  DELETE http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [204 No Content, 789B, 5ms]
+  ✓  204 No Content
+
+↳ Deleted video is gone
+  GET http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [404 Not Found, 1.06kB, 2ms]
+  ✓  404 Not Found
+
+↳ Delete is idempotent enough
+  DELETE http://localhost:30080/api/videos/6adf87a3341e1fb5f2fdc726 [404 Not Found, 1.06kB, 3ms]
+  ✓  404 on second delete
+
+┌─────────────────────────┬──────────────────┬─────────────────┐
+│                         │         executed │          failed │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│              iterations │                1 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│                requests │               20 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│            test-scripts │               20 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│      prerequest-scripts │                0 │               0 │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│              assertions │               49 │               0 │
+├─────────────────────────┴──────────────────┴─────────────────┤
+│ total run duration: 488ms                                    │
+├──────────────────────────────────────────────────────────────┤
+│ total data received: 6.63MB (approx)                         │
+├──────────────────────────────────────────────────────────────┤
+│ average response time: 8ms [min: 2ms, max: 64ms, s.d.: 14ms] │
+└──────────────────────────────────────────────────────────────┘

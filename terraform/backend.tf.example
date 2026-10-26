@@ -1,0 +1,11 @@
+# Copy to backend.tf and fill in your own bucket and table.
+# Create the bucket and DynamoDB table once, then run terraform init -migrate-state.
+terraform {
+  backend "s3" {
+    bucket         = "replace-with-your-terraform-state-bucket"
+    key            = "streamvault/terraform.tfstate"
+    region         = "ap-south-1"
+    dynamodb_table = "streamvault-terraform-locks"
+    encrypt        = true
+  }
+}
