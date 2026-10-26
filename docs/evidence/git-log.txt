@@ -1,45 +1,43 @@
 $ git log --oneline --graph --decorate
-* 44ce08b (HEAD -> main, origin/main) docs: add evidence, runbooks and ci pipeline
+* 4a3753f (HEAD -> main, origin/main) ci: install ffmpeg before generating the sample
+* 0fc73ec ci: lowercase the ghcr image name
+* 5483ba7 ci: pin a valid trivy action tag
+* cff8b08 fix: commit the gridfs storage driver
+* c42b167 feat: add api contracts, monitoring and terraform
+* 44ce08b docs: add evidence, runbooks and ci pipeline
 * e1e1c30 feat: deploy to kubernetes with horizontal autoscaling
 * 9168cb0 feat: containerise the stack with docker and nginx
 * 4af84cf feat: build stateless video streaming API
 
 $ git status --short
- M .github/workflows/ci.yml
- M README.md
- M docs/architecture.md
- M docs/autoscaling.md
- M docs/observability.md
- D k8s/observability/grafana-dashboard.json
- M package-lock.json
- M package.json
- M src/app.js
- M src/middleware/upload.js
- M src/utils/range.js
- M tests/unit/range.test.js
-?? docs/evidence/coverage.txt
-?? docs/evidence/git-and-stats.txt
-?? docs/evidence/git-log.txt
-?? docs/evidence/grafana-load.txt
-?? docs/evidence/newman-raw.txt
-?? docs/evidence/newman.txt
-?? docs/evidence/terraform-validate.txt
-?? docs/evidence/terraform.txt
-?? docs/screenshots/11-grafana-app.png
-?? docs/screenshots/12-grafana-runtime.png
-?? k8s/observability/kustomization.yaml
-?? k8s/observability/streamvault-app.json
-?? k8s/observability/streamvault-runtime.json
-?? observability/
-?? postman/
-?? terraform/
-?? tests/integration/edge-cases.test.js
-?? tests/integration/health-failure.test.js
-?? tests/integration/storage.test.js
-?? tests/unit/errorHandler.test.js
-?? tests/unit/requestContext.test.js
-?? tests/unit/videoModel.test.js
-
-$ git remote -v
-origin	https://github.com/VedarthamSaaket/video-streaming-platform.git (fetch)
-origin	https://github.com/VedarthamSaaket/video-streaming-platform.git (push)
+ M docs/evidence/git-log.txt
+ D docs/screenshots/01-ui-compose.png
+ M docs/screenshots/02-compose-ps.png
+ M docs/screenshots/03-range-request.png
+ M docs/screenshots/04-k8s-pods.png
+ M docs/screenshots/05-k8s-objects.png
+ D docs/screenshots/06-jest.png
+ D docs/screenshots/07-hpa-scaleup.png
+ D docs/screenshots/08-load-test.png
+ D docs/screenshots/09-top-pods.png
+ M docs/screenshots/10-smoke-k8s.png
+ D docs/screenshots/11-grafana-app.png
+ D docs/screenshots/12-grafana-runtime.png
+ D docs/screenshots/13-terraform-validate.png
+ D docs/screenshots/14-newman.png
+ D docs/screenshots/15-coverage.png
+?? docs/evidence/display/
+?? docs/evidence/integration-tests.txt
+?? docs/evidence/unit-tests.txt
+?? docs/screenshots/06-unit-tests.png
+?? docs/screenshots/07-integration-tests.png
+?? docs/screenshots/08-coverage.png
+?? docs/screenshots/09-newman.png
+?? docs/screenshots/11-hpa-scaleup.png
+?? docs/screenshots/12-load-test.png
+?? docs/screenshots/13-top-pods.png
+?? docs/screenshots/14-grafana-app.png
+?? docs/screenshots/15-grafana-runtime.png
+?? docs/screenshots/16-terraform-validate.png
+?? scripts/build_deck.py
+?? scripts/build_report.py

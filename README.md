@@ -126,7 +126,7 @@ Coverage:    77.04% branches, 81.69% functions
 Newman:      20 requests, 49 assertions, 0 failures
 ```
 
-![Jest test suite](docs/screenshots/06-jest.png)
+![Coverage run](docs/screenshots/08-coverage.png)
 
 ## API
 
@@ -195,12 +195,13 @@ Real captures from this build:
 |---|---|
 | [Application UI](docs/screenshots/01-ui-kubernetes.png) | [Docker Compose stack](docs/screenshots/02-compose-ps.png) |
 | [206 Range response](docs/screenshots/03-range-request.png) | [Kubernetes pods](docs/screenshots/04-k8s-pods.png) |
-| [Kubernetes objects](docs/screenshots/05-k8s-objects.png) | [Jest suite](docs/screenshots/06-jest.png) |
-| [HPA 3 → 12](docs/screenshots/07-hpa-scaleup.png) | [Autocannon 68k requests](docs/screenshots/08-load-test.png) |
-| [Peak CPU across 12 pods](docs/screenshots/09-top-pods.png) | [kind smoke test](docs/screenshots/10-smoke-k8s.png) |
-| [Grafana application dashboard](docs/screenshots/11-grafana-app.png) | [Grafana runtime dashboard](docs/screenshots/12-grafana-runtime.png) |
-| [Terraform validation](docs/screenshots/13-terraform-validate.png) | [Newman API run](docs/screenshots/14-newman.png) |
-| [Coverage report](docs/screenshots/15-coverage.png) | [Git history](docs/screenshots/16-git-log.png) |
+| [Kubernetes objects](docs/screenshots/05-k8s-objects.png) | [Unit tests](docs/screenshots/06-unit-tests.png) |
+| [Integration tests](docs/screenshots/07-integration-tests.png) | [Coverage report](docs/screenshots/08-coverage.png) |
+| [Newman API run](docs/screenshots/09-newman.png) | [kind smoke test](docs/screenshots/10-smoke-k8s.png) |
+| [HPA 3 → 12](docs/screenshots/11-hpa-scaleup.png) | [Autocannon 68k requests](docs/screenshots/12-load-test.png) |
+| [Peak CPU across 12 pods](docs/screenshots/13-top-pods.png) | [Grafana application dashboard](docs/screenshots/14-grafana-app.png) |
+| [Grafana runtime dashboard](docs/screenshots/15-grafana-runtime.png) | [Terraform validation](docs/screenshots/16-terraform-validate.png) |
+| [Git history](docs/screenshots/17-git-log.png) | [CI run](docs/screenshots/18-ci.png) |
 
 ## CI/CD
 

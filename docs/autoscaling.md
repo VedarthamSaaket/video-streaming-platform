@@ -47,7 +47,7 @@ The script starts a 120 connection autocannon run against the stream endpoint, p
 | Idle | 3 | 2 | 7% CPU per API pod |
 | 30 seconds into load | 6 | 4 | CPU crossed 169% of target |
 | 60 seconds into load | 12 | 6 | HPA hit both limits |
-| 90 seconds into load | 12 | 6 | 68,861 requests, 17.9 GB, 0 errors |
+| 90 seconds into load | 12 | 6 | 67,861 requests, 17.9 GB, 0 errors |
 | 3 minutes after load | 3 | 2 | scale-down completed |
 
 The load run sustained 421.5 requests per second with a p99 of 696 ms and no errors or timeouts.

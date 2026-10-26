@@ -1,0 +1,8 @@
+$ kubectl -n streamvault get pods -o wide
+NAME                                 READY   STATUS    RESTARTS   AGE     IP            NODE                  NOMINATED NODE   READINESS GATES
+mongo-0                              1/1     Running   0          15m     10.244.2.6    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-94xpx      1/1     Running   0          15m     10.244.1.5    streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-cpxbs      1/1     Running   0          15m     10.244.2.3    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-fcgz9      1/1     Running   0          8m20s   10.244.2.13   streamvault-worker2   <none>           <none>
+streamvault-nginx-5546476dcd-76m48   1/1     Running   0          4s      10.244.2.14   streamvault-worker2   <none>           <none>
+streamvault-nginx-5546476dcd-djx82   1/1     Running   0          4s      10.244.1.15   streamvault-worker    <none>           <none>

@@ -1,0 +1,56 @@
+$ bash scripts/hpa-demo.sh http://localhost:30080 180
+Baseline HPA state:
+NAME                REFERENCE                      TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app     Deployment/streamvault-app     cpu: 7%/60%   3         12        3          6m18s
+streamvault-nginx   Deployment/streamvault-nginx   cpu: 4%/70%   2         6         2          6m18s
+
+Starting 180s load test against http://localhost:30080 ...
+Watching the HPA while the load runs...
+22:15:18
+NAME              REFERENCE                    TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 7%/60%   3         12        3          6m18s
+ready app pods: 3
+22:15:33
+NAME              REFERENCE                    TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 9%/60%   3         12        3          6m33s
+ready app pods: 3
+22:15:48
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 169%/60%   3         12        3          6m48s
+ready app pods: 6
+22:16:04
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 480%/60%   3         12        6          7m4s
+ready app pods: 6
+22:16:19
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 489%/60%   3         12        6          7m19s
+ready app pods: 12
+22:16:34
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 321%/60%   3         12        12         7m34s
+ready app pods: 12
+22:16:49
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 273%/60%   3         12        12         7m49s
+ready app pods: 12
+22:17:04
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 161%/60%   3         12        12         8m4s
+ready app pods: 12
+22:17:19
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 152%/60%   3         12        12         8m19s
+ready app pods: 12
+22:17:35
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 136%/60%   3         12        12         8m35s
+ready app pods: 12
+22:17:50
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 129%/60%   3         12        12         8m50s
+ready app pods: 12
+22:18:05
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 118%/60%   3         12        12         9m5s
+ready app pods: 12

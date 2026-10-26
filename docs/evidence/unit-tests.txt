@@ -1,0 +1,54 @@
+$ npx jest tests/unit --runInBand
+PASS tests/unit/videoModel.test.js
+  Video model
+    ✓ applies defaults (3 ms)
+    ✓ requires a title
+    ✓ requires a storage key
+    ✓ serialises id and hides the storage key
+    ✓ exposes a findRecent helper
+
+PASS tests/unit/errorHandler.test.js
+  errorHandler
+    ✓ renders an HttpError with its headers (2 ms)
+    ✓ hides the message of an unexpected error
+    ✓ renders a ZodError as a 400 (1 ms)
+    ✓ renders a mongoose CastError as a 400
+    ✓ renders a mongoose ValidationError as a 400 with details
+    ✓ renders a JSON parse error as a 400
+    ✓ destroys the response when headers were already sent
+
+PASS tests/unit/range.test.js
+  parseRange
+    ✓ returns null when no range header is sent (1 ms)
+    ✓ parses a closed byte range
+    ✓ clamps the end of the range to the object size
+    ✓ parses an open ended range
+    ✓ parses a suffix range
+    ✓ clamps a suffix range larger than the object
+    ✓ rejects a start beyond the object (3 ms)
+    ✓ rejects a reversed range
+    ✓ rejects multiple ranges (2 ms)
+    ✓ rejects a zero length suffix
+    ✓ returns null for an empty object without a range header
+    ✓ rejects a range request on an empty object
+
+PASS tests/unit/validation.test.js
+  request validation
+    ✓ accepts a minimal create payload and applies defaults
+    ✓ rejects a create payload without a title
+    ✓ rejects a title longer than 200 characters (1 ms)
+    ✓ rejects an empty update payload
+    ✓ accepts a partial update
+    ✓ coerces pagination query parameters
+    ✓ rejects a limit above 100
+
+PASS tests/unit/requestContext.test.js
+  requestContext
+    ✓ reuses an incoming request id
+    ✓ generates a UUID when the header is missing (1 ms)
+
+Test Suites: 5 passed, 5 total
+Tests:       33 passed, 33 total
+Snapshots:   0 total
+Time:        0.332 s, estimated 1 s
+Ran all test suites matching /tests\/unit/i.

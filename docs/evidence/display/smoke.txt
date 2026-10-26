@@ -1,0 +1,72 @@
+$ bash scripts/smoke-test.sh http://localhost:30080
+Waiting for http://localhost:30080/healthz ...
+Health:
+{
+  "status": "ok",
+  "version": "1.0.0",
+  "instance": "streamvault-app-8c44775f9-cpxbs",
+  "uptimeSeconds": 366,
+  "memory": {
+    "rss": 97837056,
+    "heapTotal": 32763904,
+    "heapUsed": 31028600,
+    "external": 20882849,
+    "arrayBuffers": 18314569
+  },
+  "checks": {
+    "mongodb": "connected",
+    "storage": "up"
+  }
+}
+
+Uploading a sample video through NGINX...
+Uploaded video id: 6adf8393cf9637ba176ce28b
+
+Range request (first 64 KiB):
+HTTP/1.1 206 Partial Content
+Server: nginx
+Date: Mon, 26 Oct 2026 16:45:07 GMT
+Content-Type: video/mp4
+Content-Length: 65536
+Connection: keep-alive
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: cross-origin
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-DNS-Prefetch-Control: off
+X-Download-Options: noopen
+X-Frame-Options: SAMEORIGIN
+X-Permitted-Cross-Domain-Policies: none
+X-XSS-Protection: 0
+Access-Control-Allow-Origin: *
+X-Request-Id: 803eb129-cc6d-4f7c-ba14-f4e09d176318
+X-Served-By: streamvault-app-8c44775f9-cpxbs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=3600
+Content-Disposition: inline; filename*=UTF-8''sample.mp4
+X-Video-Id: 6adf8393cf9637ba176ce28b
+Content-Range: bytes 0-65535/3295536
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+X-Upstream-Addr: 10.244.2.3:3000
+X-Upstream-Status: 206
+
+
+Load balanced responses (X-Served-By across 12 requests):
+   3 streamvault-app-8c44775f9-94xpx
+   6 streamvault-app-8c44775f9-cgqwp
+   3 streamvault-app-8c44775f9-cpxbs
+
+Stats:
+{
+  "videoCount": 1,
+  "totalBytes": 3295536,
+  "totalViews": 2,
+  "instance": "streamvault-app-8c44775f9-cgqwp",
+  "uptimeSeconds": 366
+}
+
+Smoke test passed.

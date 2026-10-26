@@ -1,0 +1,7 @@
+$ docker compose ps
+NAME                  IMAGE               COMMAND                  SERVICE   CREATED              STATUS                        PORTS
+streamvault-app-1     streamvault-app     "/sbin/tini -- node …"   app       About a minute ago   Up About a minute (healthy)   3000/tcp
+streamvault-app-2     streamvault-app     "/sbin/tini -- node …"   app       About a minute ago   Up About a minute (healthy)   3000/tcp
+streamvault-app-3     streamvault-app     "/sbin/tini -- node …"   app       About a minute ago   Up About a minute (healthy)   3000/tcp
+streamvault-mongo-1   mongo:7.0           "docker-entrypoint.s…"   mongo     2 minutes ago        Up 2 minutes (healthy)        27017/tcp
+streamvault-nginx-1   nginx:1.27-alpine   "/docker-entrypoint.…"   nginx     2 minutes ago        Up 2 minutes (healthy)        0.0.0.0:8080->80/tcp, [::]:8080->80/tcp
