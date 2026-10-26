@@ -23,7 +23,7 @@ module.exports = [
     },
   },
   {
-    files: ['public/**/*.js'],
+    files: ['public/**/*.js', 'demo/public/**/*.js'],
     languageOptions: {
       sourceType: 'script',
       globals: { ...globals.browser },

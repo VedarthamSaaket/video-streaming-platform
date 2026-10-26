@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StreamVault Live</title>
+    <link rel="stylesheet" href="/demo.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <div class="mark">Stream<em>Vault</em> <span>live</span></div>
+      <nav id="acts">
+        <button data-act="0">00 Start</button>
+        <button data-act="1">01 One stream</button>
+        <button data-act="2">02 Six at once</button>
+        <button data-act="3">03 Load balancing</button>
+        <button data-act="4">04 Autoscaling</button>
+        <button data-act="5">05 Containers</button>
+      </nav>
+      <div class="controls">
+        <button id="prev" aria-label="Previous">←</button>
+        <button id="next" aria-label="Next">→</button>
+        <button id="tour" class="tour">Auto tour</button>
+      </div>
+    </header>
+
+    <section class="act cover active" data-act="0">
+      <p class="kicker">DevOps course based project · CSE - IoT · VNRVJIET</p>
+      <h1>Stream<em>Vault</em></h1>
+      <p class="lede">A video platform running for real on a three node Kubernetes cluster on this laptop. Nothing on these screens is recorded: every number comes from the live cluster.</p>
+      <div class="cover-row">
+        <div><b id="c-nodes">–</b><span>nodes</span></div>
+        <div><b id="c-api">–</b><span>API pods</span></div>
+        <div><b id="c-nginx">–</b><span>NGINX pods</span></div>
+        <div><b id="c-videos">–</b><span>videos in GridFS</span></div>
+      </div>
+      <button class="cta" id="begin">Begin the tour</button>
+      <p class="team">Ch. Nandini · Thanvika Devi · T. Nayana · V. Saaket · V. Aashritha</p>
+    </section>
+
+    <section class="act" data-act="1">
+      <div class="act-head">
+        <span class="num">01</span>
+        <h2>One stream.</h2>
+        <p>The browser asks for byte ranges. NGINX hands each range to an API pod, the pod reads it out of MongoDB GridFS and answers 206 Partial Content. Seek the video and watch new ranges arrive.</p>
+      </div>
+      <div class="solo">
+        <div class="frame"><video id="solo-video" controls muted playsinline></video></div>
+        <aside>
+          <h3>Requests for this player</h3>
+          <ol id="solo-log" class="log"></ol>
+        </aside>
+      </div>
+    </section>
+
+    <section class="act" data-act="2">
+      <div class="act-head">
+        <span class="num">02</span>
+        <h2>Six at <em>once.</em></h2>
+        <p>Six players, six videos, all streaming at the same time through one URL. The label under each player is the pod that served its latest chunk.</p>
+      </div>
+      <div id="tiles" class="tiles"></div>
+      <div class="tally">
+        <div><b id="t-req">0</b><span>range requests</span></div>
+        <div><b id="t-mb">0</b><span>MB streamed</span></div>
+        <div><b id="t-pods">0</b><span>distinct pods serving</span></div>
+      </div>
+    </section>
+
+    <section class="act" data-act="3">
+      <div class="act-head">
+        <span class="num">03</span>
+        <h2>One URL, <em>many pods.</em></h2>
+        <p>Fire a burst of requests at localhost:30080. NGINX re-resolves the headless service every five seconds and spreads requests over every ready API pod.</p>
+      </div>
+      <div class="lb">
+        <button class="cta" id="burst">Send 120 requests</button>
+        <div id="bars" class="bars"></div>
+      </div>
+    </section>
+
+    <section class="act" data-act="4">
+      <div class="act-head">
+        <span class="num">04</span>
+        <h2>It <em>grows.</em></h2>
+        <p>Start a real load test: 120 connections streaming 256 KB ranges. The HorizontalPodAutoscaler watches CPU against a 60 percent target and adds API pods, up to twelve.</p>
+      </div>
+      <div class="scale">
+        <div class="gauges">
+          <div class="big"><b id="g-replicas">–</b><span>API replicas</span></div>
+          <div><b id="g-cpu">–</b><span>CPU vs 60% target</span></div>
+          <div><b id="g-nginx">–</b><span>NGINX replicas</span></div>
+          <div><b id="g-load">idle</b><span>load test</span></div>
+          <button class="cta" id="load">Start load test</button>
+          <svg id="spark" viewBox="0 0 400 120" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="pods-wrap">
+          <h3>API pods</h3>
+          <div id="pods-api" class="pods"></div>
+          <h3>NGINX pods</h3>
+          <div id="pods-nginx" class="pods"></div>
+          <div class="keep">
+            <video id="keep-video" muted playsinline loop></video>
+            <p>Still streaming while the cluster scales: <b id="keep-pod">–</b></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="act" data-act="5">
+      <div class="act-head">
+        <span class="num">05</span>
+        <h2>Containers <em>all the way down.</em></h2>
+        <p>Each Kubernetes node is itself a Docker container made by kind. Every API pod runs the same streamvault image, built once by a two stage Dockerfile.</p>
+      </div>
+      <div id="nodes" class="nodes"></div>
+      <div id="docker" class="docker"></div>
+    </section>
+
+    <script src="/demo.js" defer></script>
+  </body>
+</html>
