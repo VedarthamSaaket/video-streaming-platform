@@ -10,6 +10,7 @@ const state = {
   lastSolo: 0,
   servingPods: new Set(),
   history: [],
+  maxPods: 0,
 };
 
 async function get(path, options) {
@@ -51,6 +52,10 @@ async function cover() {
   $('c-api').textContent = cluster.pods.filter((p) => p.role === 'api' && p.ready).length;
   $('c-nginx').textContent = cluster.pods.filter((p) => p.role === 'nginx' && p.ready).length;
   $('c-videos').textContent = videos.total;
+}
+
+function actApp() {
+  $('app-frame').src = `http://localhost:8098/?t=${Date.now()}`;
 }
 
 function actSolo() {
@@ -158,6 +163,7 @@ function actScale() {
   keep.src = media(state.videos[0], 'keep');
   keep.play().catch(() => {});
   if (state.tour) startLoad();
+  state.maxPods = 0;
   every(2000, async () => {
     const [cluster, load, streams] = await Promise.all([get('/api/cluster'), get('/api/load'), get('/api/streams')]);
     const app = cluster.hpa.find((h) => h.name === 'streamvault-app');
@@ -166,7 +172,9 @@ function actScale() {
     $('pods-api').innerHTML = pods(api);
     $('pods-nginx').innerHTML = pods(cluster.pods.filter((p) => p.role === 'nginx'));
     if (app) {
-      $('g-replicas').textContent = api.filter((p) => p.ready).length;
+      const readyApi = api.filter((p) => p.ready).length;
+      state.maxPods = Math.max(state.maxPods, readyApi);
+      $('g-replicas').textContent = readyApi;
       $('g-cpu').textContent = app.cpu == null ? '–' : `${app.cpu}%`;
       state.history.push(api.filter((p) => p.ready).length);
       spark();
@@ -194,7 +202,16 @@ async function actContainers() {
     `<div><span>pod images</span><span style="grid-column: span 2">${images}</span></div>`;
 }
 
-const ACTS = [cover, actSolo, actTiles, () => {}, actScale, actContainers];
+async function actResults() {
+  const [load, streams, cluster] = await Promise.all([get('/api/load'), get('/api/streams'), get('/api/cluster')]);
+  const ready = cluster.pods.filter((p) => p.role === 'api' && p.ready).length;
+  $('r-pods').textContent = Math.max(state.maxPods, ready);
+  $('r-req').textContent = load.result ? load.result.requests.toLocaleString('en-US') : load.running ? 'running' : '–';
+  $('r-err').textContent = load.result ? load.result.errors : '–';
+  $('r-streams').textContent = streams.lifetime.requests.toLocaleString('en-US');
+}
+
+const ACTS = [cover, actApp, actSolo, actTiles, () => {}, actScale, actContainers, actResults];
 
 function show(index) {
   state.act = Math.max(0, Math.min(ACTS.length - 1, index));
@@ -209,10 +226,12 @@ function show(index) {
 function scheduleTour() {
   clearTimeout(state.tourTimer);
   const next = () => (state.act < ACTS.length - 1 ? show(state.act + 1) : toggleTour(false));
-  if (state.act === 3) {
+  if (state.act === 7) {
+    toggleTour(false);
+  } else if (state.act === 4) {
     setTimeout(burst, 800);
     state.tourTimer = setTimeout(next, 11000);
-  } else if (state.act === 4) {
+  } else if (state.act === 5) {
     const started = Date.now();
     state.tourTimer = setInterval(async () => {
       const cluster = await get('/api/cluster');
@@ -223,7 +242,7 @@ function scheduleTour() {
       }
     }, 3000);
   } else {
-    state.tourTimer = setTimeout(next, [7000, 16000, 18000, 0, 0, 20000][state.act]);
+    state.tourTimer = setTimeout(next, [7000, 14000, 16000, 18000, 0, 0, 20000][state.act]);
   }
 }
 
@@ -241,7 +260,9 @@ $('prev').addEventListener('click', () => show(state.act - 1));
 $('next').addEventListener('click', () => show(state.act + 1));
 $('tour').addEventListener('click', () => toggleTour(!state.tour));
 $('begin').addEventListener('click', () => {
-  toggleTour(true);
+  state.tour = true;
+  $('tour').classList.add('on');
+  $('tour').textContent = 'Touring…';
   show(1);
 });
 $('burst').addEventListener('click', burst);
@@ -254,4 +275,5 @@ document.addEventListener('keydown', (event) => {
 get('/api/videos').then((data) => {
   state.videos = data.items;
   show(0);
+  if (new URLSearchParams(location.search).has('auto')) toggleTour(true);
 });

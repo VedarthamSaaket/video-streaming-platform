@@ -11,11 +11,13 @@
       <div class="mark">Stream<em>Vault</em> <span>live</span></div>
       <nav id="acts">
         <button data-act="0">00 Start</button>
-        <button data-act="1">01 One stream</button>
-        <button data-act="2">02 Six at once</button>
-        <button data-act="3">03 Load balancing</button>
-        <button data-act="4">04 Autoscaling</button>
-        <button data-act="5">05 Containers</button>
+        <button data-act="1">01 The app</button>
+        <button data-act="2">02 One stream</button>
+        <button data-act="3">03 Six at once</button>
+        <button data-act="4">04 Load balancing</button>
+        <button data-act="5">05 Autoscaling</button>
+        <button data-act="6">06 Containers</button>
+        <button data-act="7">07 Results</button>
       </nav>
       <div class="controls">
         <button id="prev" aria-label="Previous">←</button>
@@ -41,6 +43,15 @@
     <section class="act" data-act="1">
       <div class="act-head">
         <span class="num">01</span>
+        <h2>The <em>app.</em></h2>
+        <p>This is StreamVault itself, served by the cluster at localhost:30080. The badge at the top right names the pod that answered. Upload, search, play, download and delete all work.</p>
+      </div>
+      <div class="frame app-frame"><iframe id="app-frame" title="StreamVault"></iframe></div>
+    </section>
+
+    <section class="act" data-act="2">
+      <div class="act-head">
+        <span class="num">02</span>
         <h2>One stream.</h2>
         <p>The browser asks for byte ranges. NGINX hands each range to an API pod, the pod reads it out of MongoDB GridFS and answers 206 Partial Content. Seek the video and watch new ranges arrive.</p>
       </div>
@@ -53,9 +64,9 @@
       </div>
     </section>
 
-    <section class="act" data-act="2">
+    <section class="act" data-act="3">
       <div class="act-head">
-        <span class="num">02</span>
+        <span class="num">03</span>
         <h2>Six at <em>once.</em></h2>
         <p>Six players, six videos, all streaming at the same time through one URL. The label under each player is the pod that served its latest chunk.</p>
       </div>
@@ -67,9 +78,9 @@
       </div>
     </section>
 
-    <section class="act" data-act="3">
+    <section class="act" data-act="4">
       <div class="act-head">
-        <span class="num">03</span>
+        <span class="num">04</span>
         <h2>One URL, <em>many pods.</em></h2>
         <p>Fire a burst of requests at localhost:30080. NGINX re-resolves the headless service every five seconds and spreads requests over every ready API pod.</p>
       </div>
@@ -79,9 +90,9 @@
       </div>
     </section>
 
-    <section class="act" data-act="4">
+    <section class="act" data-act="5">
       <div class="act-head">
-        <span class="num">04</span>
+        <span class="num">05</span>
         <h2>It <em>grows.</em></h2>
         <p>Start a real load test: 120 connections streaming 256 KB ranges. The HorizontalPodAutoscaler watches CPU against a 60 percent target and adds API pods, up to twelve.</p>
       </div>
@@ -107,14 +118,33 @@
       </div>
     </section>
 
-    <section class="act" data-act="5">
+    <section class="act" data-act="6">
       <div class="act-head">
-        <span class="num">05</span>
+        <span class="num">06</span>
         <h2>Containers <em>all the way down.</em></h2>
         <p>Each Kubernetes node is itself a Docker container made by kind. Every API pod runs the same streamvault image, built once by a two stage Dockerfile.</p>
       </div>
       <div id="nodes" class="nodes"></div>
       <div id="docker" class="docker"></div>
+    </section>
+
+
+    <section class="act" data-act="7">
+      <div class="act-head">
+        <span class="num">07</span>
+        <h2>What you <em>just saw.</em></h2>
+        <p>Everything on the previous screens ran live on this laptop. These are the numbers from this run and from the project's test suite.</p>
+      </div>
+      <div class="results">
+        <div><b id="r-pods">–</b><span>most API pods seen this run</span></div>
+        <div><b id="r-req">–</b><span>load test requests this run</span></div>
+        <div><b id="r-err">–</b><span>errors</span></div>
+        <div><b id="r-streams">–</b><span>range requests streamed by the demo</span></div>
+        <div><b>84</b><span>automated tests passing</span></div>
+        <div><b>49/49</b><span>Postman assertions</span></div>
+        <div><b>5/5</b><span>CI jobs green</span></div>
+        <div><b>3 → 12</b><span>HPA range</span></div>
+      </div>
     </section>
 
     <script src="/demo.js" defer></script>

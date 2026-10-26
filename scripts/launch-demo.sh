@@ -32,15 +32,34 @@ until curl -fsS http://localhost:30080/readyz >/dev/null 2>&1; do sleep 2; done
 echo "  making sure the demo videos are in GridFS..."
 bash scripts/demo-seed.sh
 
-lsof -ti tcp:${PORT} | xargs kill 2>/dev/null || true
+echo "  resetting to 3 API pods and 2 NGINX pods so the autoscaler starts from the bottom..."
+kubectl -n streamvault scale deployment/streamvault-app --replicas=3 >/dev/null
+kubectl -n streamvault scale deployment/streamvault-nginx --replicas=2 >/dev/null
+for _ in $(seq 1 90); do
+  count="$(kubectl -n streamvault get pods --no-headers 2>/dev/null | grep -c 'streamvault-app' || true)"
+  [ "${count}" -le 3 ] && break
+  sleep 2
+done
+kubectl -n streamvault rollout status deployment/streamvault-app --timeout=120s >/dev/null
+
+lsof -ti tcp:${PORT} -ti tcp:8098 | xargs kill 2>/dev/null || true
 node demo/server.js &
 SERVER=$!
 trap 'kill ${SERVER} 2>/dev/null' EXIT INT TERM
 until curl -fsS http://localhost:${PORT}/api/videos >/dev/null 2>&1; do sleep 1; done
 
-[ -z "${NO_OPEN:-}" ] && open "http://localhost:${PORT}"
+URL="http://localhost:${PORT}/?auto=1"
+if [ -z "${NO_OPEN:-}" ]; then
+  if [ -d "/Applications/Google Chrome.app" ]; then
+    open -na "Google Chrome" --args --user-data-dir="${TMPDIR:-/tmp}/streamvault-demo-chrome" \
+      --no-first-run --no-default-browser-check --autoplay-policy=no-user-gesture-required \
+      --start-fullscreen --app="${URL}"
+  else
+    open "${URL}"
+  fi
+fi
 echo
-echo "  demo open at http://localhost:${PORT}"
+echo "  live demo running at ${URL}, the tour plays by itself"
 echo "  the app itself is at http://localhost:30080"
 echo "  close this window or press ctrl+c to stop the demo server"
 wait ${SERVER}

@@ -1,0 +1,9 @@
+{
+  "name": "streamvault-cbp-report",
+  "private": true,
+  "description": "Builds the DevOps CBP report docx",
+  "dependencies": {
+    "docx": "^9.5.1",
+    "jszip": "^3.10.1"
+  }
+}

@@ -116,6 +116,13 @@ This provisions VPC, EKS 1.31, three managed nodes, ECR, IRSA roles for the AWS 
 Controller and cluster autoscaler, plus Helm releases for both controllers and metrics-server. See
 [terraform/README.md](terraform/README.md) for the plan, apply, image push and destroy workflow.
 
+## Live demo
+
+Run `bash scripts/launch-demo.sh` (or double-click the StreamVault shortcut on the desktop).
+It starts Docker if needed, brings up the kind cluster, seeds six videos and resets the API to 3 pods.
+Then it opens a full screen tour that plays by itself: the app, one stream, six streams at once, load balancing, autoscaling under a real load test, containers and a results screen.
+The demo server lives in `demo/` and listens on port 8099.
+
 ## Test results
 
 ```

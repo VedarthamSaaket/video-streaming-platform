@@ -145,22 +145,64 @@ button {
   display: block;
 }
 
-.act[data-act='1'],
-.act[data-act='3'] {
+.act[data-act='2'],
+.act[data-act='4'] {
   background: var(--cream);
   color: var(--navy);
 }
 
-.act[data-act='2'] {
+.act[data-act='1'] {
+  background: var(--navy);
+}
+
+.act[data-act='3'] {
   background: var(--forest);
 }
 
-.act[data-act='4'] {
+.act[data-act='5'] {
   background: var(--oxblood);
 }
 
-.act[data-act='5'] {
+.act[data-act='6'] {
   background: var(--brown);
+}
+
+.act[data-act='7'] {
+  background: var(--navy);
+}
+
+.app-frame iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 330px);
+  border: 0;
+  background: var(--cream);
+}
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 6px double var(--cream);
+}
+
+.results div {
+  padding: 22px 20px 28px 0;
+  border-bottom: 1px solid rgba(220, 217, 192, 0.3);
+}
+
+.results b {
+  display: block;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 84px;
+  line-height: 1;
+  color: var(--mustard);
+}
+
+.results span {
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .cover {
@@ -286,8 +328,8 @@ button {
   letter-spacing: -0.015em;
 }
 
-.act[data-act='1'] .act-head h2 em,
-.act[data-act='3'] .act-head h2 em {
+.act[data-act='2'] .act-head h2 em,
+.act[data-act='4'] .act-head h2 em {
   color: var(--oxblood);
 }
 

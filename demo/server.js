@@ -4,6 +4,7 @@ const path = require('node:path');
 const { execFile, spawn } = require('node:child_process');
 
 const PORT = Number(process.env.DEMO_PORT || 8099);
+const APP_PORT = Number(process.env.DEMO_APP_PORT || 8098);
 const TARGET = process.env.STREAMVAULT_URL || 'http://localhost:30080';
 const NAMESPACE = 'streamvault';
 const ROOT = path.join(__dirname, '..');
@@ -13,6 +14,7 @@ const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascrip
 const streams = new Map();
 const load = { running: false, startedAt: null, seconds: 0, result: null, child: null };
 let totals = { requests: 0, bytes: 0 };
+const lifetime = { requests: 0, bytes: 0 };
 
 function run(cmd, args) {
   return new Promise((resolve) => {
@@ -121,6 +123,7 @@ function proxyStream(req, res, id, tile) {
       const pod = up.headers['x-served-by'] || 'unknown';
       streams.set(tile, { pod, status: up.statusCode, range: up.headers['content-range'] || 'full', at: Date.now() });
       totals.requests += 1;
+      lifetime.requests += 1;
       const headers = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'content-range' };
       for (const key of ['content-type', 'content-length', 'content-range', 'accept-ranges']) {
         if (up.headers[key]) headers[key] = up.headers[key];
@@ -128,6 +131,7 @@ function proxyStream(req, res, id, tile) {
       res.writeHead(up.statusCode, headers);
       up.on('data', (chunk) => {
         totals.bytes += chunk.length;
+        lifetime.bytes += chunk.length;
       });
       up.pipe(res);
     }
@@ -190,7 +194,7 @@ const server = http.createServer(async (req, res) => {
       return proxyStream(req, res, id, url.searchParams.get('tile') || '0');
     }
     if (url.pathname === '/api/streams') {
-      return json(res, 200, { tiles: Object.fromEntries(streams), totals });
+      return json(res, 200, { tiles: Object.fromEntries(streams), totals, lifetime });
     }
     if (url.pathname === '/api/streams/reset' && req.method === 'POST') {
       streams.clear();
@@ -221,12 +225,30 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+const appProxy = http.createServer((req, res) => {
+  const upstream = http.request(`${TARGET}${req.url}`, { method: req.method, headers: req.headers }, (up) => {
+    const headers = { ...up.headers };
+    delete headers['x-frame-options'];
+    delete headers['content-security-policy'];
+    res.writeHead(up.statusCode, headers);
+    up.pipe(res);
+  });
+  upstream.on('error', () => {
+    if (!res.headersSent) res.writeHead(502);
+    res.end();
+  });
+  req.pipe(upstream);
+});
+
+appProxy.listen(APP_PORT);
+
 server.listen(PORT, () => {
   console.log(`StreamVault live demo on http://localhost:${PORT} (cluster ${TARGET})`);
 });
 
 function shutdown() {
   if (load.child) load.child.kill();
+  appProxy.close();
   server.close(() => process.exit(0));
 }
 
