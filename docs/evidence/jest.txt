@@ -1,0 +1,79 @@
+
+> streamvault@1.0.0 test
+> jest --runInBand
+
+  console.error
+    ValidationError: The Express 'trust proxy' setting is true, which allows anyone to trivially bypass IP-based rate limiting. See https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/ for more information.
+        at Object.trustProxy (/Users/darthiedarte/development/video-streaming-platform/node_modules/express-rate-limit/dist/index.cjs:167:13)
+        at Object.wrappedValidations.<computed> [as trustProxy] (/Users/darthiedarte/development/video-streaming-platform/node_modules/express-rate-limit/dist/index.cjs:397:22)
+        at Object.keyGenerator (/Users/darthiedarte/development/video-streaming-platform/node_modules/express-rate-limit/dist/index.cjs:657:20)
+        at /Users/darthiedarte/development/video-streaming-platform/node_modules/express-rate-limit/dist/index.cjs:710:32
+        at /Users/darthiedarte/development/video-streaming-platform/node_modules/express-rate-limit/dist/index.cjs:691:5 {
+      code: 'ERR_ERL_PERMISSIVE_TRUST_PROXY',
+      help: 'https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/'
+    }
+
+      at Object.wrappedValidations.<computed> [as trustProxy] (node_modules/express-rate-limit/dist/index.cjs:403:24)
+      at Object.keyGenerator (node_modules/express-rate-limit/dist/index.cjs:657:20)
+      at node_modules/express-rate-limit/dist/index.cjs:710:32
+      at node_modules/express-rate-limit/dist/index.cjs:691:5
+
+PASS tests/integration/videos.test.js
+  health endpoints
+    ✓ GET /healthz reports the instance (11 ms)
+    ✓ GET /readyz reports mongo and storage as up (4 ms)
+    ✓ GET /metrics exposes Prometheus metrics (4 ms)
+  video API
+    ✓ uploads a video and hides the storage key (55 ms)
+    ✓ rejects an upload without a file (3 ms)
+    ✓ rejects a non-video file (2 ms)
+    ✓ rejects a missing title (2 ms)
+    ✓ lists uploaded videos newest first (41 ms)
+    ✓ paginates the list (40 ms)
+    ✓ searches by text (44 ms)
+    ✓ gets one video by id (37 ms)
+    ✓ returns 404 for an unknown video (2 ms)
+    ✓ returns 400 for a malformed id (1 ms)
+    ✓ streams the whole file with 200 (39 ms)
+    ✓ serves a byte range with 206 and Content-Range (35 ms)
+    ✓ serves a suffix range (37 ms)
+    ✓ returns 416 for an unsatisfiable range (35 ms)
+    ✓ increments the view counter when streamed (36 ms)
+    ✓ downloads as an attachment (38 ms)
+    ✓ updates metadata (38 ms)
+    ✓ rejects an empty update (30 ms)
+    ✓ deletes a video and its GridFS file (38 ms)
+  stats and fallbacks
+    ✓ GET /api/stats summarises the library (36 ms)
+    ✓ unknown routes return a JSON 404 (2 ms)
+    ✓ malformed JSON returns 400 (1 ms)
+
+PASS tests/unit/range.test.js
+  parseRange
+    ✓ returns null when no range header is sent
+    ✓ parses a closed byte range
+    ✓ clamps the end of the range to the object size
+    ✓ parses an open ended range
+    ✓ parses a suffix range (1 ms)
+    ✓ clamps a suffix range larger than the object
+    ✓ rejects a start beyond the object (2 ms)
+    ✓ rejects a reversed range
+    ✓ rejects multiple ranges
+    ✓ rejects a zero length suffix
+    ✓ rejects an empty object (1 ms)
+
+PASS tests/unit/validation.test.js
+  request validation
+    ✓ accepts a minimal create payload and applies defaults (1 ms)
+    ✓ rejects a create payload without a title
+    ✓ rejects a title longer than 200 characters
+    ✓ rejects an empty update payload
+    ✓ accepts a partial update
+    ✓ coerces pagination query parameters
+    ✓ rejects a limit above 100
+
+Test Suites: 3 passed, 3 total
+Tests:       43 passed, 43 total
+Snapshots:   0 total
+Time:        2.092 s, estimated 4 s
+Ran all test suites.

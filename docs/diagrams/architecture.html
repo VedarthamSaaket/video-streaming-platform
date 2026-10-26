@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #060910;
+    --panel: #0d1422;
+    --panel2: #111a2b;
+    --border: #243452;
+    --text: #eef3ff;
+    --muted: #8ea2c4;
+    --blue: #6b8fff;
+    --purple: #a06bff;
+    --green: #3ddc97;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1600px; height: 1000px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(900px 500px at 10% -5%, rgba(107,143,255,.22), transparent 60%),
+      radial-gradient(800px 480px at 95% 5%, rgba(160,107,255,.18), transparent 55%),
+      linear-gradient(160deg, #05070c, #08101d 55%, #05080e);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif;
+  }
+  .canvas { position: relative; width: 1600px; height: 1000px; }
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(1200px 700px at 50% 40%, #000 40%, transparent 100%);
+  }
+  .eyebrow {
+    position: absolute; left: 64px; top: 62px;
+    color: #8fb0ff; font-size: 15px; font-weight: 700;
+    letter-spacing: .22em; text-transform: uppercase;
+  }
+  h1 {
+    position: absolute; left: 62px; top: 92px; margin: 0;
+    font-size: 58px; letter-spacing: -.04em; line-height: .98;
+  }
+  h1 span { color: #7f9dff; }
+  .subtitle {
+    position: absolute; left: 66px; top: 214px; width: 560px;
+    color: var(--muted); font-size: 17px; line-height: 1.5;
+  }
+  .legend {
+    position: absolute; left: 66px; bottom: 42px;
+    display: flex; gap: 26px; color: var(--muted); font-size: 14px;
+  }
+  .legend b { color: var(--text); font-weight: 600; }
+  .node {
+    position: absolute;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(19,28,46,.97), rgba(12,19,33,.97));
+    box-shadow: 0 20px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.02) inset;
+  }
+  .node .label {
+    position: absolute; left: 22px; top: 18px;
+    color: var(--muted); font-size: 12px; font-weight: 700;
+    letter-spacing: .16em; text-transform: uppercase;
+  }
+  .node .name { position: absolute; left: 22px; top: 42px; font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .node .detail { position: absolute; left: 22px; bottom: 18px; right: 22px; color: var(--muted); font-size: 14px; line-height: 1.45; }
+  .mono { font-family: "SF Mono", ui-monospace, Menlo, monospace; }
+  .client { left: 58px; top: 405px; width: 240px; height: 130px; }
+  .nginx { left: 372px; top: 372px; width: 250px; height: 196px; border-color: #33507f; }
+  .nginx .name { color: #a9c2ff; }
+  .api1 { left: 698px; top: 246px; width: 300px; height: 104px; }
+  .api2 { left: 698px; top: 388px; width: 300px; height: 104px; border-color: #3f5f95; }
+  .api3 { left: 698px; top: 530px; width: 300px; height: 104px; opacity: .92; }
+  .api .name { font-size: 21px; }
+  .api .detail { font-size: 13px; bottom: 14px; }
+  .mongo { left: 1098px; top: 350px; width: 430px; height: 240px; }
+  .mongo .name { color: #c3b1ff; }
+  .hpa {
+    left: 698px; top: 706px; width: 300px; height: 112px;
+    border-style: dashed; border-color: #4c6fa8; background: rgba(14,22,38,.75);
+  }
+  .hpa .name { font-size: 20px; color: #9db9ee; }
+  .hpa .detail { font-size: 13px; }
+  .pill {
+    position: absolute; padding: 7px 13px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+  }
+  .pill.green { background: rgba(61,220,151,.12); color: #66e6b3; border: 1px solid rgba(61,220,151,.35); }
+  .pill.blue { background: rgba(107,143,255,.12); color: #a8c1ff; border: 1px solid rgba(107,143,255,.38); }
+  .pill.purple { background: rgba(160,107,255,.12); color: #c9adff; border: 1px solid rgba(160,107,255,.38); }
+  .api-pill { right: 16px; top: 14px; }
+  svg { position: absolute; inset: 0; pointer-events: none; }
+  .arrow-label {
+    position: absolute; color: #91a7c9; font-size: 13px; font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    background: rgba(6,10,17,.85); padding: 3px 7px; border-radius: 6px;
+  }
+  .num {
+    position: absolute; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 13px; font-weight: 800;
+    background: linear-gradient(135deg, var(--blue), var(--purple)); color: white;
+    box-shadow: 0 6px 18px rgba(107,143,255,.45);
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="grid"></div>
+  <div class="eyebrow">StreamVault · deployment architecture</div>
+  <h1>Stateless pods.<br><span>Stateful media.</span></h1>
+  <div class="subtitle">NGINX load balances over pod IPs. Kubernetes scales the API on CPU. MongoDB GridFS holds every byte.</div>
+
+  <svg width="1600" height="1000" viewBox="0 0 1600 1000">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#5f7fae"/>
+      </marker>
+      <marker id="arrowHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f7bff"/>
+      </marker>
+    </defs>
+    <path d="M 300 470 H 370" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 624 430 C 660 430 660 298 694 298" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 624 470 H 694" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 624 510 C 660 510 660 582 694 582" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 1000 298 C 1040 298 1040 420 1094 420" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 1000 440 H 1094" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 1000 582 C 1040 582 1040 500 1094 500" stroke="#5f7fae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 848 700 V 640" stroke="#8f7bff" stroke-width="2.5" stroke-dasharray="7 7" fill="none" marker-end="url(#arrowHot)"/>
+    <path d="M 1000 762 C 1050 762 1050 520 1094 520" stroke="#8f7bff" stroke-width="1.8" stroke-dasharray="5 7" fill="none" opacity=".65"/>
+  </svg>
+
+  <div class="node client">
+    <div class="label">Client</div>
+    <div class="name">Browser / curl</div>
+    <div class="detail">HTML5 player issues<br><span class="mono">Range: bytes=...</span></div>
+  </div>
+
+  <div class="node nginx">
+    <div class="label">Edge · 2 pods</div>
+    <div class="name">NGINX</div>
+    <div class="detail">Resolves the headless<br>service every 5s.<br>Buffering off. Range<br>headers preserved.</div>
+    <span class="pill blue" style="right:16px; top:14px;">LB</span>
+  </div>
+
+  <div class="node api api1">
+    <div class="label">API · pod 1</div>
+    <div class="name">Node.js</div>
+    <div class="detail">Express · uploads · range streams</div>
+    <span class="pill green api-pill">ready</span>
+  </div>
+  <div class="node api api2">
+    <div class="label">API · pod 2</div>
+    <div class="name">Node.js</div>
+    <div class="detail">Express · uploads · range streams</div>
+    <span class="pill green api-pill">ready</span>
+  </div>
+  <div class="node api api3">
+    <div class="label">API · pod 3 … 12</div>
+    <div class="name">Node.js</div>
+    <div class="detail">Stateless · read-only root filesystem</div>
+    <span class="pill green api-pill">ready</span>
+  </div>
+
+  <div class="node mongo">
+    <div class="label">StatefulSet · 1 pod</div>
+    <div class="name">MongoDB</div>
+    <div class="detail">
+      <span class="mono" style="color:#d9ccff">media.files</span> → metadata<br>
+      <span class="mono" style="color:#d9ccff">media.chunks</span> → video bytes<br>
+      PersistentVolumeClaim · 5 Gi local-path
+    </div>
+    <span class="pill purple" style="right:16px; top:14px;">GridFS</span>
+  </div>
+
+  <div class="node hpa">
+    <div class="label">Autoscaler</div>
+    <div class="name">HPA · CPU 60%</div>
+    <div class="detail">3 → 12 replicas · scale-up 2 pods / 30s</div>
+  </div>
+
+  <div class="arrow-label" style="left:300px; top:438px;">HTTP</div>
+  <div class="arrow-label" style="left:626px; top:334px;">round robin</div>
+  <div class="arrow-label" style="left:1006px; top:378px;">GridFS range</div>
+  <div class="arrow-label" style="left:1022px; top:742px;">metrics-server</div>
+
+  <div class="legend">
+    <span><b>Ingress</b> NGINX NodePort 30080</span>
+    <span><b>Probes</b> startup · readiness · liveness</span>
+    <span><b>Security</b> non-root · seccomp · no API token</span>
+    <span><b>CI/CD</b> GitHub Actions → GHCR</span>
+  </div>
+</div>
+</body>
+</html>

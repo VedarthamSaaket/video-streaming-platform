@@ -1,0 +1,129 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  test:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+          if-no-files-found: ignore
+
+  manifests:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Render overlays
+        run: |
+          cp k8s/base/secrets.env.example k8s/base/secrets.env
+          kubectl kustomize k8s/overlays/local > /tmp/local.yaml
+          kubectl kustomize k8s/overlays/cloud > /tmp/cloud.yaml
+      - name: Install kubeconform
+        run: |
+          curl -sSLo kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/kubeconform
+      - name: Validate manifests
+        run: |
+          kubeconform -strict -summary -ignore-missing-schemas /tmp/local.yaml /tmp/cloud.yaml
+
+  image:
+    name: Build and scan image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: streamvault:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: streamvault:ci
+          format: table
+          exit-code: "0"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag streamvault:ci "${IMAGE}:${GITHUB_SHA}"
+          docker tag streamvault:ci "${IMAGE}:latest"
+          docker push "${IMAGE}:${GITHUB_SHA}"
+          docker push "${IMAGE}:latest"
+
+  e2e:
+    name: Deploy to kind and smoke test
+    runs-on: ubuntu-latest
+    needs: image
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build image
+        run: docker build -t streamvault:local .
+      - name: Create kind cluster
+        run: bash scripts/kind-up.sh
+      - name: Deploy the stack
+        run: bash scripts/deploy-local.sh skip-build
+      - name: Generate a sample video
+        run: bash scripts/generate-sample.sh
+      - name: Run smoke test
+        run: bash scripts/smoke-test.sh http://localhost:30080
+      - name: Show cluster state
+        if: always()
+        run: |
+          kubectl -n streamvault get pods -o wide
+          kubectl -n streamvault get deploy,svc,hpa,pdb
+          kubectl -n streamvault get events --sort-by=.lastTimestamp | tail -30

@@ -1,0 +1,7 @@
+NAME                                 CPU(cores)   MEMORY(bytes)   
+mongo-0                              46m          145Mi           
+streamvault-app-8c44775f9-94xpx      7m           43Mi            
+streamvault-app-8c44775f9-cgqwp      7m           42Mi            
+streamvault-app-8c44775f9-cpxbs      7m           43Mi            
+streamvault-nginx-5546476dcd-2bgtg   3m           8Mi             
+streamvault-nginx-5546476dcd-5txhz   1m           8Mi             

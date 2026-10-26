@@ -1,0 +1,17 @@
+$ kubectl -n streamvault get hpa streamvault-app -w
+
+22:15:18   cpu:   7% / 60%   replicas 3    pods 3
+22:15:33   cpu:   9% / 60%   replicas 3    pods 3
+22:15:48   cpu: 169% / 60%   replicas 3    pods 6   ← scale-up starts
+22:16:04   cpu: 480% / 60%   replicas 6    pods 6
+22:16:19   cpu: 489% / 60%   replicas 6    pods 12  ← second scale-up
+22:16:34   cpu: 321% / 60%   replicas 12   pods 12
+22:16:49   cpu: 273% / 60%   replicas 12   pods 12
+22:17:04   cpu: 161% / 60%   replicas 12   pods 12
+22:17:19   cpu: 152% / 60%   replicas 12   pods 12
+22:17:35   cpu: 136% / 60%   replicas 12   pods 12
+22:17:50   cpu: 129% / 60%   replicas 12   pods 12
+22:18:05   cpu: 118% / 60%   replicas 12   pods 12
+
+ScalingLimited: TooManyReplicas
+  desired replica count is more than the maximum replica count

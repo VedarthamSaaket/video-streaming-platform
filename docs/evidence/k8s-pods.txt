@@ -1,0 +1,8 @@
+NAME                                 READY   STATUS      RESTARTS        AGE   IP           NODE                  NOMINATED NODE   READINESS GATES
+mongo-0                              1/1     Running     0               6m    10.244.2.6   streamvault-worker2   <none>           <none>
+mongo-init-2mnfn                     0/1     Completed   0               33s   10.244.1.8   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-94xpx      1/1     Running     0               6m    10.244.1.5   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-cgqwp      1/1     Running     0               6m    10.244.1.4   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-cpxbs      1/1     Running     0               6m    10.244.2.3   streamvault-worker2   <none>           <none>
+streamvault-nginx-5546476dcd-2bgtg   1/1     Running     6 (2m50s ago)   6m    10.244.1.6   streamvault-worker    <none>           <none>
+streamvault-nginx-5546476dcd-5txhz   1/1     Running     6 (3m1s ago)    6m    10.244.2.4   streamvault-worker2   <none>           <none>

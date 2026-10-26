@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: StreamVault API
+  version: 1.0.0
+  description: >
+    Video streaming API with MongoDB GridFS storage, HTTP Range support and Kubernetes ready
+    health and metrics endpoints.
+servers:
+  - url: http://localhost:30080
+    description: Local kind cluster
+  - url: http://localhost:8080
+    description: Docker Compose
+tags:
+  - name: Health
+  - name: Videos
+  - name: Stats
+paths:
+  /healthz:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      responses:
+        "200":
+          description: Process is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  instance: { type: string }
+                  uptimeSeconds: { type: integer }
+  /readyz:
+    get:
+      tags: [Health]
+      summary: Readiness probe
+      description: Returns 503 until MongoDB and GridFS are reachable.
+      responses:
+        "200":
+          description: Ready to serve traffic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ready }
+                  checks:
+                    type: object
+                    properties:
+                      mongodb: { type: string }
+                      storage: { type: string }
+        "503":
+          description: Not ready
+  /health:
+    get:
+      tags: [Health]
+      summary: Detailed health
+      responses:
+        "200":
+          description: Health details
+  /metrics:
+    get:
+      tags: [Health]
+      summary: Prometheus metrics
+      responses:
+        "200":
+          description: Prometheus text exposition format
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/videos:
+    get:
+      tags: [Videos]
+      summary: List videos
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: search
+          schema: { type: string, maxLength: 100 }
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoList"
+    post:
+      tags: [Videos]
+      summary: Upload a video
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, file]
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                  example: Kubernetes autoscaling demo
+                description:
+                  type: string
+                  maxLength: 2000
+                uploadedBy:
+                  type: string
+                  maxLength: 100
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+        "400":
+          description: Missing file or invalid fields
+        "413":
+          description: File too large
+        "415":
+          description: Unsupported media type
+  /api/videos/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Videos]
+      summary: Get video metadata
+      responses:
+        "200":
+          description: Video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+        "404":
+          description: Not found
+    patch:
+      tags: [Videos]
+      summary: Update video metadata
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string, maxLength: 200 }
+                description: { type: string, maxLength: 2000 }
+                uploadedBy: { type: string, maxLength: 100 }
+      responses:
+        "200":
+          description: Updated
+        "400":
+          description: Empty or invalid body
+    delete:
+      tags: [Videos]
+      summary: Delete a video
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+  /api/videos/{id}/stream:
+    get:
+      tags: [Videos]
+      summary: Stream video bytes
+      description: Supports a single `Range` header and replies with 206 when partial content is requested.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: header
+          name: Range
+          schema: { type: string, example: bytes=0-65535 }
+      responses:
+        "200":
+          description: Full content
+          headers:
+            Accept-Ranges:
+              schema: { type: string, example: bytes }
+            Content-Length:
+              schema: { type: integer }
+        "206":
+          description: Partial content
+          headers:
+            Content-Range:
+              schema: { type: string, example: bytes 0-65535/2097152 }
+            Content-Length:
+              schema: { type: integer }
+        "404":
+          description: Video not found
+        "416":
+          description: Range not satisfiable
+  /api/videos/{id}/download:
+    get:
+      tags: [Videos]
+      summary: Download as attachment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Attachment stream
+  /api/stats:
+    get:
+      tags: [Stats]
+      summary: Library totals
+      responses:
+        "200":
+          description: Totals and serving instance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  videoCount: { type: integer }
+                  totalBytes: { type: integer }
+                  totalViews: { type: integer }
+                  instance: { type: string }
+                  uptimeSeconds: { type: integer }
+components:
+  schemas:
+    Video:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        originalName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer }
+        uploadedBy: { type: string }
+        views: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    VideoList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Video"
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        pages: { type: integer }
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        statusCode: { type: integer }
+        requestId: { type: string }
+        instance: { type: string }
+        details: { type: object }

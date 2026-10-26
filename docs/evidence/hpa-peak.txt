@@ -1,0 +1,41 @@
+$ kubectl -n streamvault get hpa
+NAME                REFERENCE                      TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app     Deployment/streamvault-app     cpu: 321%/60%   3         12        12         7m44s
+streamvault-nginx   Deployment/streamvault-nginx   cpu: 130%/70%   2         6         6          7m44s
+
+$ kubectl -n streamvault get pods -l app=streamvault-app -o wide
+NAME                              READY   STATUS    RESTARTS   AGE     IP            NODE                  NOMINATED NODE   READINESS GATES
+streamvault-app-8c44775f9-4gxbm   1/1     Running   0          58s     10.244.1.10   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-5gnkb   1/1     Running   0          58s     10.244.2.7    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-6m5qf   1/1     Running   0          28s     10.244.1.13   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-94xpx   1/1     Running   0          7m44s   10.244.1.5    streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-c7xl8   1/1     Running   0          28s     10.244.2.11   streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-cgqwp   1/1     Running   0          7m44s   10.244.1.4    streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-cpxbs   1/1     Running   0          7m44s   10.244.2.3    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-d6647   1/1     Running   0          28s     10.244.1.14   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-fcgz9   1/1     Running   0          28s     10.244.2.13   streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-jtt7g   1/1     Running   0          58s     10.244.2.8    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-qllll   1/1     Running   0          28s     10.244.2.12   streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-zr7dt   1/1     Running   0          28s     10.244.1.12   streamvault-worker    <none>           <none>
+
+$ kubectl -n streamvault top pods
+NAME                                 CPU(cores)   MEMORY(bytes)   
+mongo-0                              443m         128Mi           
+streamvault-app-8c44775f9-4gxbm      245m         49Mi            
+streamvault-app-8c44775f9-5gnkb      252m         59Mi            
+streamvault-app-8c44775f9-6m5qf      116m         47Mi            
+streamvault-app-8c44775f9-94xpx      261m         51Mi            
+streamvault-app-8c44775f9-c7xl8      125m         47Mi            
+streamvault-app-8c44775f9-cgqwp      315m         53Mi            
+streamvault-app-8c44775f9-cpxbs      256m         51Mi            
+streamvault-app-8c44775f9-d6647      122m         47Mi            
+streamvault-app-8c44775f9-fcgz9      121m         47Mi            
+streamvault-app-8c44775f9-jtt7g      312m         51Mi            
+streamvault-app-8c44775f9-qllll      119m         49Mi            
+streamvault-app-8c44775f9-zr7dt      128m         48Mi            
+streamvault-nginx-5546476dcd-2bgtg   109m         10Mi            
+streamvault-nginx-5546476dcd-5txhz   137m         11Mi            
+streamvault-nginx-5546476dcd-d6ml8   1m           8Mi             
+streamvault-nginx-5546476dcd-df87w   1m           8Mi             
+streamvault-nginx-5546476dcd-qh5dl   1m           8Mi             
+streamvault-nginx-5546476dcd-qqhq4   1m           8Mi             

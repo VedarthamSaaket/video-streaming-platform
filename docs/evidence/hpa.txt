@@ -1,0 +1,116 @@
+Baseline HPA state:
+NAME                REFERENCE                      TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app     Deployment/streamvault-app     cpu: 7%/60%   3         12        3          6m18s
+streamvault-nginx   Deployment/streamvault-nginx   cpu: 4%/70%   2         6         2          6m18s
+
+Starting 180s load test against http://localhost:30080 ...
+Watching the HPA while the load runs...
+22:15:18
+NAME              REFERENCE                    TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 7%/60%   3         12        3          6m18s
+ready app pods: 3
+22:15:33
+NAME              REFERENCE                    TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 9%/60%   3         12        3          6m33s
+ready app pods: 3
+22:15:48
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 169%/60%   3         12        3          6m48s
+ready app pods: 6
+22:16:04
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 480%/60%   3         12        6          7m4s
+ready app pods: 6
+22:16:19
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 489%/60%   3         12        6          7m19s
+ready app pods: 12
+22:16:34
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 321%/60%   3         12        12         7m34s
+ready app pods: 12
+22:16:49
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 273%/60%   3         12        12         7m49s
+ready app pods: 12
+22:17:04
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 161%/60%   3         12        12         8m4s
+ready app pods: 12
+22:17:19
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 152%/60%   3         12        12         8m19s
+ready app pods: 12
+22:17:35
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 136%/60%   3         12        12         8m35s
+ready app pods: 12
+22:17:50
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 129%/60%   3         12        12         8m50s
+ready app pods: 12
+22:18:05
+NAME              REFERENCE                    TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app   Deployment/streamvault-app   cpu: 118%/60%   3         12        12         9m5s
+ready app pods: 12
+
+Load test summary:
+Target      : http://localhost:30080/api/videos/6adf8399cf9637ba176ce29d/stream
+Connections : 120
+Duration    : 180s
+Range       : bytes=0-262143
+
+
+┌─────────┬───────┬────────┬────────┬────────┬───────────┬───────────┬─────────┐
+│ Stat    │ 2.5%  │ 50%    │ 97.5%  │ 99%    │ Avg       │ Stdev     │ Max     │
+├─────────┼───────┼────────┼────────┼────────┼───────────┼───────────┼─────────┤
+│ Latency │ 46 ms │ 304 ms │ 596 ms │ 696 ms │ 319.79 ms │ 111.42 ms │ 1475 ms │
+└─────────┴───────┴────────┴────────┴────────┴───────────┴───────────┴─────────┘
+┌───────────┬─────────┬─────────┬────────┬────────┬────────┬─────────┬───────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%    │ 97.5%  │ Avg    │ Stdev   │ Min   │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼─────────┼───────┤
+│ Req/Sec   │ 272     │ 347     │ 456    │ 483    │ 421.5  │ 56.58   │ 262   │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼─────────┼───────┤
+│ Bytes/Sec │ 71.6 MB │ 91.4 MB │ 120 MB │ 127 MB │ 111 MB │ 14.9 MB │ 69 MB │
+└───────────┴─────────┴─────────┴────────┴────────┴────────┴─────────┴───────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 161
+
+68k requests in 181.34s, 17.9 GB read
+
+{
+  "requests": 67861,
+  "throughputMB": 17032.4,
+  "requestsPerSecond": 421.5,
+  "latencyP99Ms": 696,
+  "errors": 0,
+  "non2xx": 0,
+  "timeouts": 0
+}
+
+Final HPA and pods:
+NAME                REFERENCE                      TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+streamvault-app     Deployment/streamvault-app     cpu: 115%/60%   3         12        12         9m20s
+streamvault-nginx   Deployment/streamvault-nginx   cpu: 77%/70%    2         6         6          9m20s
+NAME                                 READY   STATUS      RESTARTS        AGE     IP            NODE                  NOMINATED NODE   READINESS GATES
+mongo-0                              1/1     Running     0               9m20s   10.244.2.6    streamvault-worker2   <none>           <none>
+mongo-init-2mnfn                     0/1     Completed   0               3m53s   10.244.1.8    streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-4gxbm      1/1     Running     0               2m34s   10.244.1.10   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-5gnkb      1/1     Running     0               2m34s   10.244.2.7    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-6m5qf      1/1     Running     0               2m4s    10.244.1.13   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-94xpx      1/1     Running     0               9m20s   10.244.1.5    streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-c7xl8      1/1     Running     0               2m4s    10.244.2.11   streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-cgqwp      1/1     Running     0               9m20s   10.244.1.4    streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-cpxbs      1/1     Running     0               9m20s   10.244.2.3    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-d6647      1/1     Running     0               2m4s    10.244.1.14   streamvault-worker    <none>           <none>
+streamvault-app-8c44775f9-fcgz9      1/1     Running     0               2m4s    10.244.2.13   streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-jtt7g      1/1     Running     0               2m34s   10.244.2.8    streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-qllll      1/1     Running     0               2m4s    10.244.2.12   streamvault-worker2   <none>           <none>
+streamvault-app-8c44775f9-zr7dt      1/1     Running     0               2m4s    10.244.1.12   streamvault-worker    <none>           <none>
+streamvault-nginx-5546476dcd-2bgtg   1/1     Running     6 (6m10s ago)   9m20s   10.244.1.6    streamvault-worker    <none>           <none>
+streamvault-nginx-5546476dcd-5txhz   1/1     Running     6 (6m21s ago)   9m20s   10.244.2.4    streamvault-worker2   <none>           <none>
+streamvault-nginx-5546476dcd-d6ml8   1/1     Running     0               2m34s   10.244.2.9    streamvault-worker2   <none>           <none>
+streamvault-nginx-5546476dcd-df87w   1/1     Running     0               2m19s   10.244.1.11   streamvault-worker    <none>           <none>
+streamvault-nginx-5546476dcd-qh5dl   1/1     Running     0               2m19s   10.244.2.10   streamvault-worker2   <none>           <none>
+streamvault-nginx-5546476dcd-qqhq4   1/1     Running     0               2m34s   10.244.1.9    streamvault-worker    <none>           <none>

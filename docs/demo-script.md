@@ -1,0 +1,147 @@
+# Demo script
+
+A 12 minute walkthrough for the review. Every command below produces real output on the lab machine.
+
+## 0. Before the review
+
+```bash
+cd ~/development/video-streaming-platform
+make kind-up
+make deploy
+bash scripts/generate-sample.sh
+bash scripts/seed.sh
+```
+
+Keep three terminals ready:
+
+1. Repository root.
+2. `kubectl -n streamvault get pods -w`.
+3. `kubectl -n streamvault get hpa streamvault-app -w`.
+
+## 1. The problem (30 seconds)
+
+A video platform has two very different traffic patterns. Uploads are large sequential writes.
+Playback is many concurrent byte-range reads. A single server cannot handle either well for long, and
+a shared local disk makes adding replicas painful.
+
+StreamVault keeps the API stateless: metadata and bytes live in MongoDB, so any pod can serve any
+request. NGINX handles the edge and Kubernetes handles the replica count.
+
+## 2. Show the stack running (2 minutes)
+
+```bash
+docker compose ps
+curl -s http://localhost:30080/health | jq
+kubectl -n streamvault get pods -o wide
+kubectl -n streamvault get deploy,svc,hpa,pdb
+```
+
+Point out:
+
+- Three API pods on different nodes.
+- Two NGINX pods.
+- The HPA target of 60 percent CPU.
+- The headless service used by NGINX.
+
+## 3. Upload and play (2 minutes)
+
+Open <http://localhost:30080> and upload a video. Then show the same thing from the terminal:
+
+```bash
+curl -X POST http://localhost:30080/api/videos \
+  -F "title=Review demo" \
+  -F "file=@docs/sample/sample.mp4;type=video/mp4" | jq
+```
+
+Copy the id:
+
+```bash
+VIDEO_ID=<id>
+curl -s -D - -o /dev/null -H "Range: bytes=0-65535" \
+  http://localhost:30080/api/videos/$VIDEO_ID/stream
+```
+
+Expected lines:
+
+```
+HTTP/1.1 206 Partial Content
+Content-Range: bytes 0-65535/.....
+Content-Length: 65536
+Accept-Ranges: bytes
+X-Upstream-Addr: 10.244.x.x:3000
+X-Served-By: streamvault-app-...
+```
+
+The browser player uses the same path. Seeking sends a new Range request.
+
+## 4. Load balancing (1 minute)
+
+```bash
+for i in $(seq 1 30); do
+  curl -s -D - -o /dev/null http://localhost:30080/healthz |
+    awk -F': ' 'tolower($1)=="x-served-by"{print $2}'
+done | sort | uniq -c
+```
+
+All three pods should appear. NGINX resolves the headless service every five seconds, so a new pod
+joins without touching the proxy configuration.
+
+## 5. Tests (1 minute)
+
+```bash
+npm test
+```
+
+43 tests across range parsing, validation and the real HTTP surface. The integration suite uploads a
+Buffer, reads it back with Range headers, checks the exact bytes, verifies 206 and 416 responses, and
+confirms deletion removes the GridFS file.
+
+## 6. Autoscaling (3 minutes)
+
+```bash
+make hpa
+```
+
+Narrate the four phases:
+
+1. Idle: 3 pods, low CPU.
+2. Load starts: HPA raises the CPU target above 60 percent.
+3. New pods appear one by one and NGINX starts sending them traffic.
+4. Load stops: after the 60 second window, the deployment scales back to 3.
+
+Show the metrics:
+
+```bash
+kubectl top pods -l app=streamvault-app
+kubectl -n streamvault describe hpa streamvault-app
+```
+
+## 7. Reliability and security details (1 minute)
+
+```bash
+kubectl -n streamvault rollout restart deploy/streamvault-app
+kubectl -n streamvault get pods -w
+```
+
+No failed requests: `maxUnavailable: 0` and readiness probes make the rollout overlap old and new
+pods. Mention:
+
+- Non-root user, read-only root filesystem, all capabilities dropped, seccomp profile.
+- Startup, readiness and liveness probes.
+- PodDisruptionBudgets for drains.
+- NetworkPolicy default deny.
+- Secrets are generated into Kubernetes, never baked into the image.
+
+## 8. CI/CD (1 minute)
+
+Open the GitHub Actions run. Four jobs:
+
+1. Lint and 43 tests.
+2. Kustomize render plus kubeconform validation.
+3. Image build, Trivy scan and GHCR push.
+4. kind cluster, real deployment, upload, range check and load balancing check.
+
+## 9. Close
+
+The same manifests run on a cloud overlay with a LoadBalancer, an Ingress, gp3 storage and a higher
+HPA ceiling. The lab proves the orchestration and autoscaling behaviour without cloud spend.

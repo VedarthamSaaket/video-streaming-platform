@@ -1,0 +1,17 @@
+NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/streamvault-app     3/3     3            3           6m
+deployment.apps/streamvault-nginx   2/2     2            2           6m
+
+NAME                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/mongo                      ClusterIP   None            <none>        27017/TCP      6m
+service/streamvault-app            ClusterIP   10.96.226.208   <none>        3000/TCP       6m
+service/streamvault-app-headless   ClusterIP   None            <none>        3000/TCP       6m
+service/streamvault-nginx          NodePort    10.96.75.14     <none>        80:30080/TCP   6m
+
+NAME                                                    REFERENCE                      TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/streamvault-app     Deployment/streamvault-app     cpu: 10%/60%         3         12        3          6m
+horizontalpodautoscaler.autoscaling/streamvault-nginx   Deployment/streamvault-nginx   cpu: <unknown>/70%   2         6         2          6m
+
+NAME                                           MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+poddisruptionbudget.policy/streamvault-app     2               N/A               1                     6m
+poddisruptionbudget.policy/streamvault-nginx   1               N/A               1                     6m
