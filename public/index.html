@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StreamVault</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">SV</span>
+        <div>
+          <h1>StreamVault</h1>
+          <p>Video streaming platform on Kubernetes</p>
+        </div>
+      </div>
+      <div class="cluster">
+        <span class="dot" id="health-dot"></span>
+        <span id="instance-label">connecting</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <span class="eyebrow">Node.js / MongoDB / NGINX / Kubernetes</span>
+          <h2>Upload once. Stream from any replica.</h2>
+          <p>
+            Every request is served by a different pod behind the NGINX load balancer.
+            The deployment scales horizontally when CPU crosses 60 percent.
+          </p>
+        </div>
+        <dl class="stats">
+          <div><dt>Videos</dt><dd id="stat-videos">0</dd></div>
+          <div><dt>Views</dt><dd id="stat-views">0</dd></div>
+          <div><dt>Stored</dt><dd id="stat-size">0 MB</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel upload-panel">
+        <h2>Upload a video</h2>
+        <form id="upload-form">
+          <div class="field-row">
+            <label>
+              Title
+              <input id="title" name="title" type="text" maxlength="200" required placeholder="Kubernetes autoscaling demo" />
+            </label>
+            <label>
+              Description
+              <input id="description" name="description" type="text" maxlength="2000" placeholder="Optional" />
+            </label>
+          </div>
+          <label class="file-picker" id="drop-zone">
+            <input id="file" name="file" type="file" accept="video/*" required />
+            <span id="file-label">Choose a video file or drop it here</span>
+          </label>
+          <button type="submit" id="upload-button">Upload</button>
+          <p id="upload-status" class="status" role="status"></p>
+        </form>
+      </section>
+
+      <section class="library">
+        <div class="library-head">
+          <h2>Library</h2>
+          <input id="search" type="search" placeholder="Search titles" />
+        </div>
+        <div id="video-grid" class="grid"></div>
+        <p id="empty-state" class="empty" hidden>No videos yet. Upload one to get started.</p>
+      </section>
+    </main>
+
+    <footer>
+      <span id="footer-instance">StreamVault</span>
+      <span>Range requests enabled · 206 Partial Content</span>
+    </footer>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

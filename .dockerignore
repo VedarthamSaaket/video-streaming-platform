@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+coverage
+.git
+.github
+docs/screenshots
+docs/sample
+tests
+k8s
+scripts
+*.md
+.env
+storage

@@ -1,0 +1,10 @@
+node_modules/
+coverage/
+storage/
+uploads/
+.env
+*.log
+.DS_Store
+docs/sample/*.mp4
+k8s/base/secrets.env
+kind-logs/
