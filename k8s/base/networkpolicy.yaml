@@ -1,0 +1,119 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+spec:
+  podSelector: {}
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongo-access
+spec:
+  podSelector:
+    matchLabels:
+      app: mongo
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: streamvault-app
+      ports:
+        - protocol: TCP
+          port: 27017
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mongo-init
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongo-init-access
+spec:
+  podSelector:
+    matchLabels:
+      app: mongo-init
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mongo
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: app-access
+spec:
+  podSelector:
+    matchLabels:
+      app: streamvault-app
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: streamvault-nginx
+        - podSelector:
+            matchLabels:
+              app: streamvault-app
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mongo
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nginx-access
+spec:
+  podSelector:
+    matchLabels:
+      app: streamvault-nginx
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: streamvault-app
+      ports:
+        - protocol: TCP
+          port: 3000

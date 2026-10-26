@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: streamvault
+
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - configmap.yaml
+  - mongo-service.yaml
+  - mongo-statefulset.yaml
+  - mongo-init-job.yaml
+  - app-service.yaml
+  - app-deployment.yaml
+  - app-hpa.yaml
+  - app-pdb.yaml
+  - nginx-configmap.yaml
+  - nginx-deployment.yaml
+  - nginx-service.yaml
+  - nginx-hpa.yaml
+  - nginx-pdb.yaml
+  - networkpolicy.yaml
+
+secretGenerator:
+  - name: streamvault-secrets
+    envs:
+      - secrets.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    app.kubernetes.io/part-of: streamvault

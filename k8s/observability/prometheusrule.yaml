@@ -1,0 +1,56 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: streamvault-alerts
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: streamvault.rules
+      rules:
+        - alert: StreamVaultHighErrorRate
+          expr: |
+            sum(rate(streamvault_http_request_duration_seconds_count{status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(streamvault_http_request_duration_seconds_count[5m])), 0.001)
+            > 0.02
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: More than 2 percent of StreamVault requests are failing
+            description: The 5xx ratio has been above 2 percent for 5 minutes.
+
+        - alert: StreamVaultP99LatencyHigh
+          expr: |
+            histogram_quantile(0.99,
+              sum by (le) (rate(streamvault_http_request_duration_seconds_bucket[5m]))
+            ) > 1.5
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: StreamVault p99 latency is above 1.5 seconds
+            description: Check MongoDB health and the number of active streams.
+
+        - alert: StreamVaultHpaAtCeiling
+          expr: |
+            kube_horizontalpodautoscaler_status_current_replicas{horizontalpodautoscaler="streamvault-app"}
+            >=
+            kube_horizontalpodautoscaler_spec_max_replicas{horizontalpodautoscaler="streamvault-app"}
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: StreamVault is running at its maximum replica count
+            description: Increase maxReplicas or add cluster capacity.
+
+        - alert: StreamVaultPodRestarting
+          expr: |
+            increase(kube_pod_container_status_restarts_total{namespace="streamvault"}[10m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: A StreamVault pod is restarting repeatedly
+            description: Check liveness probes, memory limits and MongoDB connectivity.

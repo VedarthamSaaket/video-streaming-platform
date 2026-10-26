@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  serviceName: mongo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: mongo
+          image: mongo:7.0
+          args:
+            - --bind_ip_all
+            - --wiredTigerCacheSizeGB
+            - "0.5"
+          ports:
+            - name: mongodb
+              containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: streamvault-secrets
+                  key: MONGO_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: streamvault-secrets
+                  key: MONGO_ROOT_PASSWORD
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - >-
+                  mongosh --quiet --username "$MONGO_INITDB_ROOT_USERNAME"
+                  --password "$MONGO_INITDB_ROOT_PASSWORD"
+                  --authenticationDatabase admin
+                  --eval "db.adminCommand({ping:1}).ok"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - >-
+                  mongosh --quiet --username "$MONGO_INITDB_ROOT_USERNAME"
+                  --password "$MONGO_INITDB_ROOT_PASSWORD"
+                  --authenticationDatabase admin
+                  --eval "db.adminCommand({ping:1}).ok"
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 150m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

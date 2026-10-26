@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-init
+  labels:
+    app: mongo-init
+spec:
+  backoffLimit: 12
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: mongo-init
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: create-app-user
+          image: mongo:7.0
+          command:
+            - sh
+            - -c
+            - |
+              until mongosh --quiet --host mongo \
+                --username "$MONGO_ROOT_USERNAME" \
+                --password "$MONGO_ROOT_PASSWORD" \
+                --authenticationDatabase admin \
+                --eval "db.adminCommand({ping:1}).ok" >/dev/null 2>&1; do
+                echo "waiting for mongo";
+                sleep 3;
+              done
+              mongosh --quiet --host mongo \
+                --username "$MONGO_ROOT_USERNAME" \
+                --password "$MONGO_ROOT_PASSWORD" \
+                --authenticationDatabase admin \
+                --eval 'const d=db.getSiblingDB(process.env.MONGO_DB_NAME); try { d.createUser({user: process.env.MONGO_APP_USERNAME, pwd: process.env.MONGO_APP_PASSWORD, roles: [{role: "readWrite", db: process.env.MONGO_DB_NAME}]}); print("created application user"); } catch (error) { if (error.codeName !== "DuplicateKey" && error.code !== 51003) { throw error; } print("application user already exists"); }'
+          env:
+            - name: MONGO_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: streamvault-secrets
+                  key: MONGO_ROOT_USERNAME
+            - name: MONGO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: streamvault-secrets
+                  key: MONGO_ROOT_PASSWORD
+            - name: MONGO_APP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: streamvault-secrets
+                  key: MONGO_APP_USERNAME
+            - name: MONGO_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: streamvault-secrets
+                  key: MONGO_APP_PASSWORD
+            - name: MONGO_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: streamvault-config
+                  key: MONGODB_DB
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

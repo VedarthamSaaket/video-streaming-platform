@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        storageClassName: gp3
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
